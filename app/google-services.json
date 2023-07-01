@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "271916850018",
+    "firebase_url": "https://restaurantdb-b4e5e-default-rtdb.firebaseio.com",
+    "project_id": "restaurantdb-b4e5e",
+    "storage_bucket": "restaurantdb-b4e5e.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:271916850018:android:92d3800d2d5ce8e22a6a3b",
+        "android_client_info": {
+          "package_name": "com.example.nhahang"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "271916850018-45o7rma3r3m0hbhmi7ia0rgrhtbc6bnr.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBxuZnLL4yzxJiGOZPdvWa_cdvPDDLXx4E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "271916850018-45o7rma3r3m0hbhmi7ia0rgrhtbc6bnr.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

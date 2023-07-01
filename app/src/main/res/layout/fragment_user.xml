@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <androidx.appcompat.widget.Toolbar
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/gradient_background"
+                android:id="@+id/toolbar">
+
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/black"
+                    android:textSize="16sp"
+                    android:text="Chỉnh sửa"
+                    android:layout_gravity="right"
+                    android:layout_marginEnd="20dp"
+                    android:id="@+id/edit" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/black"
+                    android:textSize="16sp"
+                    android:visibility="gone"
+                    android:text="Ghi lại"
+                    android:layout_gravity="right"
+                    android:layout_marginEnd="20dp"
+                    android:id="@+id/save" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/black"
+                    android:textSize="16sp"
+                    android:text="Hủy bỏ"
+                    android:visibility="gone"
+                    android:layout_gravity="left"
+                    android:id="@+id/cancel"/>
+
+            </androidx.appcompat.widget.Toolbar>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/banner"
+                android:layout_width="match_parent"
+                android:layout_height="120dp"
+                android:background="@drawable/banner"
+                android:layout_below="@id/toolbar"/>
+
+            <de.hdodenhof.circleimageview.CircleImageView
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                android:id="@+id/avatar"
+                android:layout_width="180dp"
+                android:layout_height="180dp"
+                android:layout_below="@id/banner"
+                android:layout_marginTop="-60dp"
+                android:layout_centerHorizontal="true"
+                android:src="@drawable/user_icon"
+                app:civ_circle_background_color="@color/silver"
+                app:civ_border_width="2dp"
+                app:civ_border_color="#FF000000"/>
+
+
+
+            <TextView
+                android:id="@+id/changeAvatarTv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/avatar"
+                android:layout_centerHorizontal="true"
+                android:text="Thay ảnh"
+                android:drawableRight="@drawable/icon_edit_14dp"
+                android:textColor="@color/black"
+                android:textSize="14sp"/>
+
+            <LinearLayout
+                android:id="@+id/informationLL"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/changeAvatarTv"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="10dp"
+                android:layout_marginBottom="10dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/nameTv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginBottom="20dp"
+                    android:text="Nguyễn Văn A"
+                    android:textColor="@color/black"
+                    android:textSize="16sp" />
+
+                <EditText
+                    android:id="@+id/nameEt"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/edit_text_rounded_corner"
+                    android:elevation="0dp"
+                    android:hint="@string/name"
+                    android:inputType="textPersonName"
+                    android:padding="10dp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:gravity="center"
+                    android:orientation="horizontal">
+
+                    <com.hbb20.CountryCodePicker
+                        android:id="@+id/ccp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:ccp_clickable="false"
+                        app:ccp_defaultNameCode="VN"
+                        app:ccp_rememberLastSelection="true"
+                        app:ccp_showFlag="false"
+                        app:ccp_showNameCode="false" />
+
+                    <EditText
+                        android:id="@+id/phoneEt"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="5dp"
+                        android:background="@drawable/edit_text_rounded_corner"
+                        android:hint="Số điện thoại"
+                        android:inputType="phone"
+                        android:padding="10dp" />
+
+                </LinearLayout>
+
+                <EditText
+                    android:id="@+id/emailEt"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:background="@drawable/edit_text_rounded_corner"
+                    android:hint="Email"
+                    android:inputType="textEmailAddress"
+                    android:padding="10dp" />
+
+                <EditText
+                    android:id="@+id/dateBornEt"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:background="@drawable/edit_text_rounded_corner"
+                    android:hint="Ngày sinh"
+                    android:inputType="textPersonName"
+                    android:padding="10dp" />
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="10dp">
+
+                    <TextView
+                        android:id="@+id/sexTv"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:text="Giới tính"
+                        android:textColor="@color/black"
+                        android:textSize="18sp" />
+
+                    <RadioGroup
+                        android:id="@+id/sexRg"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentRight="true"
+                        android:orientation="horizontal">
+
+                        <RadioButton
+                            android:id="@+id/maleRb"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Nam" />
+
+                        <RadioButton
+                            android:id="@+id/femaleRb"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Nữ" />
+
+                        <RadioButton
+                            android:id="@+id/ortherRb"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Khác" />
+
+                    </RadioGroup>
+
+                </RelativeLayout>
+
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="10dp"
+                android:layout_below="@id/informationLL"
+                android:orientation="vertical">
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="15dp"
+                    android:background="@color/ghost_white"/>
+                <TextView
+                    android:id="@+id/logout"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Đăng xuất"
+                    android:textSize="16sp"
+                    android:textColor="@color/scarlet"
+                    android:layout_gravity="center"
+                    android:layout_margin="10dp"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Phiên bản 0.1(beta)"
+                    android:textSize="14sp"
+                    android:textColor="@color/black"
+                    android:layout_gravity="center" />
+
+            </LinearLayout>
+
+        </RelativeLayout>
+    </ScrollView>
+    <ProgressBar
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/progressbar"
+        android:layout_centerInParent="true"/>
+
+</RelativeLayout>
