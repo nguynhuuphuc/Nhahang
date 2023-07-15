@@ -8,6 +8,7 @@
     <color name="scarlet">#FF2400</color>
     <color name="teal_200">#FF03DAC5</color>
     <color name="teal_700">#FF018786</color>
+    <color name="lime_green">#32CD32</color>
     <color name="black">#FF000000</color>
     <color name="light_black">#454545</color>
     <color name="gray">#808080</color>
@@ -15,7 +16,9 @@
     <color name="silver">#C0C0C0</color>
     <color name="white">#FFFFFFFF</color>
     <color name="deep_sky_blue">#00BFFF	</color>
+    <color name="light_blue">#add8e6</color>
     <color name="blue">#0000FF</color>
     <color name="ghost_white">#f8f8ff</color>
+    <color name="dark_white">#E1D9D1</color>
 
 </resources>

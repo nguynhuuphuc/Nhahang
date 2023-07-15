@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:paddingBottom="250dp">
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:navigationIcon="@drawable/close_icon">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Xóa món"
+            android:layout_gravity="center"
+            android:textSize="16sp"
+            android:textColor="@color/black"/>
+        <TextView
+            android:id="@+id/acceptTv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Xác nhận"
+            android:layout_gravity="right"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            android:paddingEnd="5dp"/>
+    </androidx.appcompat.widget.Toolbar>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Hãy chắc chắn bạn muốn xóa móm"
+        android:textSize="16sp"
+        android:layout_marginStart="5dp"
+        android:textColor="@color/neon_red"/>
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/ghost_white"
+        android:hint="Lý do xóa món"
+        android:textSize="16sp"
+        android:padding="15dp"
+        android:layout_margin="5dp"/>
+
+</LinearLayout>

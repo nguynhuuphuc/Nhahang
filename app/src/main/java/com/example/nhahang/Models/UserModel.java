@@ -7,11 +7,30 @@ public class UserModel {
     String dateofbirth;
     String sex;
     String avatar;
+    String position;
 
     public UserModel() {
     }
 
-    public UserModel(String name,String phone, String email, String dateofbirth, String sex, String avatar) {
+    public String getPosition() {
+        return position;
+    }
+
+    public void setPosition(String position) {
+        this.position = position;
+    }
+
+    public UserModel(String name, String phone, String email, String dateofbirth, String sex, String avatar, String position) {
+        this.name = name;
+        this.phone = phone;
+        this.email = email;
+        this.dateofbirth = dateofbirth;
+        this.sex = sex;
+        this.avatar = avatar;
+        this.position = position;
+    }
+
+    public UserModel(String name, String phone, String email, String dateofbirth, String sex, String avatar) {
         this.name = name;
         this.phone = phone;
         this.email = email;

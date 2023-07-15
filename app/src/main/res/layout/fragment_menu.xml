@@ -3,26 +3,11 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <androidx.appcompat.widget.Toolbar
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@drawable/gradient_background"
-        android:id="@+id/toolbar">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="@color/black"
-            android:textSize="16sp"
-            android:text="Thực đơn"
-            android:layout_gravity="center"
-            android:id="@+id/toolbar_title" />
-    </androidx.appcompat.widget.Toolbar>
     <LinearLayout
         android:id="@+id/allMenuLl"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/toolbar"
+        android:layout_alignParentTop="true"
         android:orientation="vertical">
 
         <androidx.recyclerview.widget.RecyclerView

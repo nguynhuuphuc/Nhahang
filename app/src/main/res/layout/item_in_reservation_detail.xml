@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.zerobranch.layout.SwipeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="90dp"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_margin="5dp"
+    android:id="@+id/swipe_layout"
+    app:draggedItem="@id/drag_item"
+    app:rightItem="@id/deleteIv"
+    app:swipeDirection="left">
+
+    <ImageView
+        android:id="@+id/deleteIv"
+        android:layout_width="85dp"
+        android:layout_height="match_parent"
+        android:background="#ff5722"
+        android:src="@drawable/delete_icon"
+        android:gravity="center"
+        android:paddingEnd="24dp"
+        android:paddingStart="24dp"
+        android:layout_gravity="end"
+        app:tint="@color/white" />
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/drag_item"
+        android:layout_width="match_parent"
+        android:layout_height="90dp">
+
+        <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/gradient_background">
+
+        <RelativeLayout
+            android:id="@+id/imageItemInMenuRl"
+            android:layout_width="100dp"
+            android:layout_height="100dp">
+            <ImageView
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:src="@drawable/ic_baseline_local_dining_24"
+                android:id="@+id/imageItemInMenuIv">
+            </ImageView>
+
+            <ImageView
+                android:id="@+id/checkIv"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_centerInParent="true"
+                android:background="@drawable/circle_background_for_add_remove_btn"
+                android:src="@drawable/check_icon"
+                app:tint="#5ea2ce"
+                android:visibility="gone"/>
+        </RelativeLayout>
+
+
+        <TextView
+            android:id="@+id/nameItemInMenuTv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginEnd="5dp"
+            android:layout_marginBottom="5dp"
+            android:layout_toRightOf="@id/imageItemInMenuRl"
+            android:text="Name"
+            android:textColor="@color/black"
+            android:textStyle="bold" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/priceItemInMenuTv"
+            android:text="10,000"
+            android:textColor="@color/black"
+            android:layout_toRightOf="@id/imageItemInMenuRl"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="5dp"/>
+
+        <TextView
+            android:id="@+id/quantityTv"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginStart="5dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginEnd="5dp"
+            android:layout_marginBottom="5dp"
+            android:background="@drawable/circle_background_for_add_remove_btn"
+            android:gravity="center"
+            android:text="1"
+            android:textColor="@color/black"
+            android:textSize="16sp" />
+
+    </RelativeLayout>
+
+    </androidx.cardview.widget.CardView>
+
+</com.zerobranch.layout.SwipeLayout>

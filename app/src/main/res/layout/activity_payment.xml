@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".PaymentActivity"
+    android:background="@color/ghost_white">
+    <androidx.appcompat.widget.Toolbar
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/toolbar"
+        app:title="Thanh toán"
+        app:navigationIcon="@drawable/arrow_back_ios_icon"
+        android:background="@color/white"/>
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/toolbar"
+        android:layout_above="@id/doneCv">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Tổng đơn"
+            android:layout_margin="10dp"
+            android:textColor="@color/black"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/white"
+            android:orientation="horizontal"
+            android:layout_marginTop="2dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Tổng tiền hàng"
+                android:textColor="@color/black"
+                android:padding="10dp"/>
+            <TextView
+                android:id="@+id/quantity"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0"
+                android:textColor="@color/black"
+                android:padding="5dp"
+                android:textSize="12dp"
+                android:layout_marginStart="5dp"
+                android:background="@drawable/border_black_line_background"/>
+            <TextView
+                android:id="@+id/totalPrice"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="0"
+                android:textColor="@color/black"
+                android:padding="10dp"
+                android:gravity="right"/>
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/white"
+            android:orientation="horizontal"
+            android:layout_marginTop="2dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Giảm giá"
+                android:layout_gravity="center_vertical"
+                android:textColor="@color/black"
+                android:padding="10dp"/>
+            <com.google.android.material.button.MaterialButtonToggleGroup
+                android:id="@+id/toggleGroupDiscount"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="2"
+                android:gravity="right"
+                app:checkedButton="@id/btn_vnd"
+                app:singleSelection="true"
+                app:selectionRequired="true">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_vnd"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="60dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:text="vnđ"
+                    android:textSize="8dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_percent"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="60dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:text="%" />
+            </com.google.android.material.button.MaterialButtonToggleGroup>
+
+            <EditText
+                android:id="@+id/discountEt"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="5dp"
+                android:layout_marginEnd="5dp"
+                android:layout_weight="2"
+                android:background="@drawable/edit_text_rounded_corner"
+                android:inputType="numberDecimal"
+                android:padding="5dp"
+                android:imeOptions="actionDone"
+                android:gravity="right"
+                android:textColor="@color/black"
+                android:layout_gravity="center_vertical"/>
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/white"
+            android:orientation="horizontal"
+            android:layout_marginTop="2dp"
+            android:layout_marginBottom="10dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Khách cần trả"
+                android:textColor="@color/black"
+                android:padding="10dp"/>
+            <TextView
+                android:id="@+id/needToPay"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="0"
+                android:textColor="@color/black"
+                android:padding="10dp"
+                android:gravity="right"/>
+        </LinearLayout>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_marginStart="10dp"
+            android:text="Khách hàng thanh toán"
+            android:textColor="@color/black"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@color/white">
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                app:cardCornerRadius="4dp">
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="5dp"
+                    android:background="@drawable/border_black_line_background">
+                    <ImageView
+                        android:id="@+id/icon_cash"
+                        android:layout_width="40dp"
+                        android:layout_height="30dp"
+                        android:src="@drawable/money_icon"/>
+                    <TextView
+                        android:id="@+id/name_payment"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Tiền mặt"
+                        android:textColor="@color/black"
+                        android:layout_centerVertical="true"
+                        android:layout_toEndOf="@id/icon_cash"/>
+                    <ImageView
+                        android:layout_width="15dp"
+                        android:layout_height="15dp"
+                        android:src="@drawable/forward_ios_icon"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"/>
+
+                </RelativeLayout>
+
+            </androidx.cardview.widget.CardView>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Tiền khách trả"
+                android:layout_marginStart="10dp"
+                android:textColor="@color/black"/>
+            <EditText
+                android:id="@+id/customerPayEt"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/black"
+                android:textSize="16dp"
+                android:layout_margin="10dp"
+                android:imeOptions="actionDone"
+                android:textStyle="bold"
+                android:text="0"
+                android:inputType="number"
+                android:gravity="right"/>
+        </LinearLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="30dp"
+            android:background="@color/white">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:text="Tiền thừa trả khách"
+                android:textColor="@color/black"/>
+            <TextView
+                android:id="@+id/moneyChangeTv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:text="0"
+                android:textColor="@color/black"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="10dp"
+                android:textSize="16sp"/>
+
+        </RelativeLayout>
+
+    </LinearLayout>
+
+    </ScrollView>
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/doneCv"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="10dp"
+        app:cardCornerRadius="8dp">
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Hoàn thành"
+        android:gravity="center"
+        android:padding="15dp"
+        android:textColor="@color/white"
+        android:textStyle="bold"
+        android:textSize="16sp"
+        android:background="@color/deep_sky_blue"/>
+    </androidx.cardview.widget.CardView>
+</RelativeLayout>

@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".TemporaryPaymentActivity"
+    android:background="@color/ghost_white">
+    <androidx.appcompat.widget.Toolbar
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        app:navigationIcon="@drawable/close_icon"
+        android:id="@+id/toolbar"
+        app:title="Xem tạm tính"
+        android:background="@color/white"/>
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/toolbar">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/contentRv"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="right"
+                    android:background="@color/white"
+                    android:layout_marginTop="20dp"
+                    android:padding="2dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Tổng tiền hàng"
+                        android:textColor="@color/black"/>
+
+                    <TextView
+                        android:id="@+id/quantity"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0"
+                        android:textSize="12sp"
+                        android:textColor="@color/black"
+                        android:textAlignment="center"
+                        android:padding="2dp"
+                        android:background="@drawable/border_black_line_background"
+                        android:layout_marginStart="2dp"/>
+                    <TextView
+                        android:id="@+id/totalPrice"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0"
+                        android:textColor="@color/black"
+                        android:layout_marginStart="10dp"/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_marginTop="2dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:background="@color/white"
+                    android:padding="2dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Giảm giá"
+                        android:textColor="@color/black"
+                        android:layout_gravity="left"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="right"
+                        android:text="0"
+                        android:textColor="@color/black"
+                        android:layout_marginStart="10dp"/>
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="right"
+                        android:text="0"
+                        android:textColor="@color/black"
+                        android:layout_marginStart="20dp"/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_marginTop="2dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:background="@color/white"
+                    android:padding="2dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Thu khác"
+                        android:textColor="@color/black"
+                        android:layout_gravity="left"/>
+
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="right"
+                        android:text="0"
+                        android:textColor="@color/black"
+                        android:layout_marginStart="20dp"/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_marginTop="2dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:background="@color/white"
+                    android:padding="2dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Khách cần phải trả"
+                        android:textColor="@color/black"
+                        android:textStyle="bold"
+                        android:layout_gravity="left"/>
+
+                    <TextView
+                        android:id="@+id/totalPricePayment"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="right"
+                        android:text="0"
+                        android:textColor="@color/black"
+                        android:layout_marginStart="20dp"
+                        android:textStyle="bold"/>
+
+                </LinearLayout>
+
+
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+
+    </ScrollView>
+
+
+
+</RelativeLayout>

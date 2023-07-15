@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -18,8 +19,7 @@ import com.example.nhahang.Adapters.MenuCategoryAdapter;
 import com.example.nhahang.Interfaces.IClickItemMenuCategoryListener;
 import com.example.nhahang.Interfaces.IItemMenu;
 import com.example.nhahang.Models.MenuCategoryModel;
-import com.example.nhahang.Models.MenuModels;
-import com.example.nhahang.R;
+import com.example.nhahang.Models.MenuModel;
 import com.example.nhahang.databinding.FragmentMenuBinding;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -35,7 +35,7 @@ public class MenuFragment extends Fragment {
 
     private FragmentMenuBinding binding;
     FirebaseFirestore db = FirebaseFirestore.getInstance();
-    List<MenuModels> menuModelsList = new ArrayList<>();
+    List<MenuModel> menuModelsList = new ArrayList<>();
     List<MenuCategoryModel> menuCategoryModelList = new ArrayList<>();
 
     MenuAdapter menuAdapter;
@@ -78,16 +78,27 @@ public class MenuFragment extends Fragment {
                 });
 
         binding.itemInMenuRv.setLayoutManager(new LinearLayoutManager(getContext(),RecyclerView.VERTICAL,false));
-        menuAdapter = new MenuAdapter(menuModelsList, new IItemMenu() {
+        menuAdapter = new MenuAdapter(menuModelsList,getContext(), new IItemMenu() {
             @Override
-            public void loadImgItem(String img, ImageView imgV) {
-                Glide.with(getContext()).load(img).into(imgV);
+            public void loadImgItem(MenuModel models, ImageView imgV, LinearLayout quantityLl, ImageView checkIv) {
+                Glide.with(getActivity()).load(models.getImg()).into(imgV);
             }
 
             @Override
-            public void onClickItemMenuListener(MenuModels models) {
+            public void onClickItemMenuListener(MenuModel models) {
 
             }
+
+            @Override
+            public void onClickPlusListener(MenuModel models,int value) {
+
+            }
+
+            @Override
+            public void onClickMinusListener(MenuModel models, String signal,int value) {
+
+            }
+
         });
         binding.itemInMenuRv.setAdapter(menuAdapter);
 
@@ -98,7 +109,7 @@ public class MenuFragment extends Fragment {
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if(task.isSuccessful()){
                             for (QueryDocumentSnapshot document: task.getResult()){
-                                MenuModels model = document.toObject(MenuModels.class);
+                                MenuModel model = document.toObject(MenuModel.class);
                                 menuModelsList.add(model);
                             }
                             menuAdapter.notifyDataSetChanged();
@@ -122,7 +133,7 @@ public class MenuFragment extends Fragment {
                         public void onComplete(@NonNull Task<QuerySnapshot> task) {
                             if(task.isSuccessful()){
                                 for (QueryDocumentSnapshot document: task.getResult()){
-                                    MenuModels model = document.toObject(MenuModels.class);
+                                    MenuModel model = document.toObject(MenuModel.class);
                                     menuModelsList.add(model);
                                 }
                                 menuAdapter.notifyDataSetChanged();
@@ -140,7 +151,7 @@ public class MenuFragment extends Fragment {
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if(task.isSuccessful()){
                             for (QueryDocumentSnapshot document : task.getResult()){
-                                MenuModels model = document.toObject(MenuModels.class);
+                                MenuModel model = document.toObject(MenuModel.class);
                                 menuModelsList.add(model);
                             }
                             menuAdapter.notifyDataSetChanged();

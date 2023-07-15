@@ -29,6 +29,7 @@ public class MenuCategoryAdapter extends RecyclerView.Adapter<MenuCategoryAdapte
         this.iClickItemMenuCategoryListener = iClickItemMenuCategoryListener;
     }
 
+
     @NonNull
     @Override
     public MenuCategoryAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {

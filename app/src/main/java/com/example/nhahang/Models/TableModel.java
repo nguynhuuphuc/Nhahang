@@ -1,6 +1,9 @@
 package com.example.nhahang.Models;
 
-public class TableModel {
+import java.io.Serializable;
+
+public class TableModel implements Serializable {
+    String documentId;
     String id;
     String description;
     String status;
@@ -14,6 +17,14 @@ public class TableModel {
         this.description = description;
         this.status = status;
         this.location = location;
+    }
+
+    public String getDocumentId() {
+        return documentId;
+    }
+
+    public void setDocumentId(String documentId) {
+        this.documentId = documentId;
     }
 
     public String getId() {

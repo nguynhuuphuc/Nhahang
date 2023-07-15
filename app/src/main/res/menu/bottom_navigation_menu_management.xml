@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/action_products"
+        android:title="Món ăn"
+        android:icon="@drawable/food_icon"/>
+    <item
+        android:id="@+id/action_type_products"
+        android:icon="@drawable/list_icon"
+        android:title="Danh mục" />
+</menu>

@@ -86,7 +86,6 @@ public class VerifyOtpActivity extends AppCompatActivity {
                             public void onVerificationFailed(@NonNull FirebaseException e) {
                                 Toast.makeText(VerifyOtpActivity.this, "Gửi OTP không thành công", Toast.LENGTH_SHORT).show();
                                 setInProgress(false);
-
                             }
 
                             @Override

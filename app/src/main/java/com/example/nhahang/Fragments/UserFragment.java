@@ -119,7 +119,6 @@ public class UserFragment extends Fragment {
             }
         });
 
-
         binding.save.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -165,6 +164,7 @@ public class UserFragment extends Fragment {
                                                 }
                                             });
                                 }
+
                             });
                         }
                     });

@@ -2,6 +2,8 @@ package com.example.nhahang.Fragments;
 
 
 
+import android.app.ActivityOptions;
+import android.content.Intent;
 import android.nfc.Tag;
 import android.os.Bundle;
 import android.os.Handler;
@@ -9,10 +11,13 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.app.ActivityOptionsCompat;
+import androidx.core.view.ViewCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -25,32 +30,41 @@ import com.example.nhahang.Interfaces.IClickItemTableListener;
 import com.example.nhahang.Models.CategoryTableModel;
 import com.example.nhahang.Models.TableModel;
 
+import com.example.nhahang.SelectProductActitvity;
 import com.example.nhahang.databinding.FragmentHomeBinding;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class HomeFragment extends Fragment{
 
     private FragmentHomeBinding binding;
     FirebaseFirestore db = FirebaseFirestore.getInstance();
-
+    FirebaseDatabase dbRealtime = FirebaseDatabase.getInstance();
+    String location = "01";
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         binding = FragmentHomeBinding.inflate(getLayoutInflater());
         View view = binding.getRoot();
+
 
         binding.typeTableRv.setLayoutManager(new LinearLayoutManager(getContext(),LinearLayoutManager.HORIZONTAL,false));
         List<CategoryTableModel> categoryTableModelList = new ArrayList<>();
@@ -58,22 +72,61 @@ public class HomeFragment extends Fragment{
         List<TableModel> tableModelList = new ArrayList<>();
         TableAdapter tableAdapter = new TableAdapter(tableModelList, new IClickItemTableListener() {
             @Override
-            public void onClickItemTableListener(TableModel tableModel) {
-
+            public void onClickItemTableListener(TableModel tableModel, LinearLayout tablelabelLl,String oldPrice) {
+                Intent intent = new Intent(getContext(), SelectProductActitvity.class);
+                intent.putExtra("table",tableModel);
+                intent.putExtra("activity","Home");
+                ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(
+                        requireActivity(),
+                        tablelabelLl,
+                        Objects.requireNonNull(ViewCompat.getTransitionName(tablelabelLl))
+                );
+                startActivity(intent,options.toBundle());
             }
         });
         GridLayoutManager gridLayoutManager = new GridLayoutManager(getContext(),2);
         binding.tableRv.setLayoutManager(gridLayoutManager);
         binding.tableRv.setAdapter(tableAdapter);
-        displayTable("01",tableModelList,tableAdapter);
+        displayTable(location,tableModelList,tableAdapter);
 
         CategoryTableAdapter categoryTableAdapter = new CategoryTableAdapter(categoryTableModelList, new IClickItemCategoryTableListener() {
             @Override
             public void onClickItemCategoryTableListener(CategoryTableModel categoryTableModel) {
-                displayTable(categoryTableModel.getType(),tableModelList,tableAdapter);
+                location = categoryTableModel.getType();
+                displayTable(location,tableModelList,tableAdapter);
                 InProgress(false);
             }
 
+        });
+        dbRealtime.getReference("orders").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                Boolean isChanged = snapshot.getValue(Boolean.class);
+                if(Boolean.TRUE.equals(isChanged)){
+                    displayTable(location,tableModelList,tableAdapter);
+                    dbRealtime.getReference("orders").setValue(false);
+                }
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+        dbRealtime.getReference("changedResTable").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                Boolean isChanged = snapshot.getValue(Boolean.class);
+                if(Boolean.TRUE.equals(isChanged)){
+                    displayTable(location,tableModelList,tableAdapter);
+                    dbRealtime.getReference("changedResTable").setValue(false);
+                }
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
         });
 
         binding.typeTableRv.setAdapter(categoryTableAdapter);
@@ -113,6 +166,7 @@ public class HomeFragment extends Fragment{
 
     private void displayTable(String location, List<TableModel> tableModelList, TableAdapter tableAdapter) {
         InProgress(true);
+        tableModelList.clear();
         db.collection("tables")
                 .orderBy("id", Query.Direction.DESCENDING)
                 .get()
@@ -123,8 +177,10 @@ public class HomeFragment extends Fragment{
                             tableModelList.clear();
                             for (QueryDocumentSnapshot documet: task.getResult()){
                                 TableModel model = documet.toObject(TableModel.class);
-                                if(model.getLocation().equals(location))
+                                if(model.getLocation().equals(location) && model.getStatus().trim().isEmpty()){
+                                    model.setDocumentId(documet.getId());
                                     tableModelList.add(0,model);
+                                }
                             }
                             tableAdapter.notifyDataSetChanged();
                             InProgress(false);

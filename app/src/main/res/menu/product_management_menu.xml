@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/action_search"
+        android:title="Search"
+        android:icon="@drawable/search_icon"
+        app:showAsAction="always"
+        app:actionViewClass="androidx.appcompat.widget.SearchView"/>
+    <item
+        app:showAsAction="always"
+        android:icon="@drawable/more_vert_icon"
+        android:title="">
+        <menu>
+            <item
+                android:id="@+id/addNewProduct"
+                android:icon="@drawable/add_icon"
+                app:showAsAction="never"
+                android:title="Thêm mới"/>
+            <item
+                android:id="@+id/trash"
+                android:icon="@drawable/delete_icon"
+                app:showAsAction="never"
+                android:title="Thùng rác" />
+        </menu>
+    </item>
+
+</menu>

@@ -3,6 +3,8 @@ package com.example.nhahang.Models;
 public class MenuCategoryModel {
     String id;
     String name;
+    String documentId;
+
 
     public MenuCategoryModel() {
     }
@@ -10,6 +12,14 @@ public class MenuCategoryModel {
     public MenuCategoryModel(String id, String name) {
         this.id = id;
         this.name = name;
+    }
+
+    public String getDocumentId() {
+        return documentId;
+    }
+
+    public void setDocumentId(String documentId) {
+        this.documentId = documentId;
     }
 
     public String getId() {
