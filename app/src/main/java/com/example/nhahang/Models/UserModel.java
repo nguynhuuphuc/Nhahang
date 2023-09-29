@@ -1,6 +1,8 @@
 package com.example.nhahang.Models;
 
-public class UserModel {
+import java.io.Serializable;
+
+public class UserModel implements Serializable {
     String name;
     String phone;
     String email;
@@ -8,8 +10,17 @@ public class UserModel {
     String sex;
     String avatar;
     String position;
+    String documentId;
 
     public UserModel() {
+    }
+
+    public String getDocumentId() {
+        return documentId;
+    }
+
+    public void setDocumentId(String documentId) {
+        this.documentId = documentId;
     }
 
     public String getPosition() {

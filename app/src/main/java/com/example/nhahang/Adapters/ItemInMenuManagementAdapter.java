@@ -13,6 +13,7 @@ import android.widget.Button;
 import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -27,6 +28,7 @@ import com.example.nhahang.R;
 import com.example.nhahang.ReservationDetailActivity;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
@@ -58,6 +60,31 @@ public class ItemInMenuManagementAdapter extends RecyclerView.Adapter<ItemInMenu
         if(!model.getImg().trim().isEmpty()) Glide.with(context).load(model.getImg()).into(holder.imageView);
         holder.nameP.setText(model.getName());
         holder.priceP.setText(model.getPrice());
+        try {
+            if(model.getDelete().equals(true)){
+                holder.trashLayout.setVisibility(View.VISIBLE);
+                holder.defaultLayout.setVisibility(View.GONE);
+            }
+        }catch (Exception ignored){}
+
+        holder.restore.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FirebaseFirestore db = FirebaseFirestore.getInstance();
+                FirebaseDatabase dbRealtime = FirebaseDatabase.getInstance();
+                db.collection("menu").document(model.getDocumentId())
+                        .update("isDelete",false);
+                dbRealtime.getReference("trashChange").setValue(true);
+            }
+        });
+        holder.forceDelete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                buildDialogForceDelete(model);
+                dialog.show();
+            }
+        });
+
         holder.edit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -86,7 +113,8 @@ public class ItemInMenuManagementAdapter extends RecyclerView.Adapter<ItemInMenu
 
         private ImageView imageView;
         private TextView nameP,priceP;
-        private CardView edit,delete;
+        private CardView edit,delete,restore,forceDelete;
+        private LinearLayout defaultLayout, trashLayout;
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             imageView = itemView.findViewById(R.id.imageItemInMenuIv);
@@ -94,6 +122,10 @@ public class ItemInMenuManagementAdapter extends RecyclerView.Adapter<ItemInMenu
             priceP = itemView.findViewById(R.id.priceProductTv);
             edit = itemView.findViewById(R.id.editProduct);
             delete = itemView.findViewById(R.id.deleteProduct);
+            defaultLayout = itemView.findViewById(R.id.defaultLayout);
+            trashLayout = itemView.findViewById(R.id.layout4Strash);
+            restore = itemView.findViewById(R.id.restoreProduct);
+            forceDelete = itemView.findViewById(R.id.forceDeleteProduct);
 
         }
     }
@@ -109,11 +141,54 @@ public class ItemInMenuManagementAdapter extends RecyclerView.Adapter<ItemInMenu
                             @Override
                             public void onSuccess(Void unused) {
                                 Toast.makeText(context, "Xóa thành công!", Toast.LENGTH_SHORT).show();
+                                FirebaseDatabase.getInstance().getReference("productManagementChange").setValue(true);
                             }
                         }).addOnFailureListener(new OnFailureListener() {
                             @Override
                             public void onFailure(@NonNull Exception e) {
                                 Toast.makeText(context, "Xóa không thành công!", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+
+            }
+        });
+        builder.setNegativeButton("Hủy", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+            }
+        });
+        dialog = builder.create();
+        dialog.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dia) {
+                // Truy cập và tùy chỉnh nút PositiveButton
+                Button positiveButton = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
+                positiveButton.setBackgroundColor(Color.RED);
+                positiveButton.setTextColor(Color.WHITE);
+            }
+        });
+    }
+
+    private void buildDialogForceDelete(MenuModel model) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setMessage("Bạn có muốn xóa "+ model.getName() +" không?")
+                .setTitle("Xóa");
+        builder.setPositiveButton("Vẫn Xóa", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                FirebaseFirestore.getInstance().collection("menu").document(model.getDocumentId())
+                        .delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void unused) {
+                                menuModelsList.remove(model);
+                                notifyDataSetChanged();
+                                Toast.makeText(context, "Xóa thành công", Toast.LENGTH_SHORT).show();
+                            }
+                        }).addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Toast.makeText(context, "Xóa không thành công", Toast.LENGTH_SHORT).show();
+
                             }
                         });
 

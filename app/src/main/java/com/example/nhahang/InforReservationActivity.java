@@ -31,6 +31,8 @@ public class InforReservationActivity extends AppCompatActivity {
         binding = ActivityInforReservationBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+
+        inProgress(false);
         binding.toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -54,10 +56,19 @@ public class InforReservationActivity extends AppCompatActivity {
                 });
     }
 
+    private void inProgress(boolean isIn) {
+        if(isIn){
+            binding.progressBar.setVisibility(View.VISIBLE);
+            binding.contentSv.setVisibility(View.GONE);
+        }
+        binding.progressBar.setVisibility(View.GONE);
+        binding.contentSv.setVisibility(View.VISIBLE);
+    }
+
     private void viewData(ReservationModel model) {
+        inProgress(true);
         String time = model.getCurrentTime() + " " + model.getCurrentDate();
         binding.time.setText(time);
-
         db.collection("users").document(model.getStaffId())
                 .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                     @Override
@@ -67,9 +78,11 @@ public class InforReservationActivity extends AppCompatActivity {
                             UserModel user = doc.toObject(UserModel.class);
                             assert user != null;
                             binding.staffName.setText(user.getName());
+                            inProgress(false);
                         }
                     }
                 });
 
     }
+
 }

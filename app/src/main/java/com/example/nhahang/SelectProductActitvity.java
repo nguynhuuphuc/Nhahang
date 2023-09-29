@@ -3,6 +3,7 @@ package com.example.nhahang;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -10,6 +11,8 @@ import android.animation.Animator;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.View;
@@ -29,7 +32,9 @@ import com.example.nhahang.Models.MenuModel;
 import com.example.nhahang.Models.ProductInReservationModel;
 import com.example.nhahang.Models.TableModel;
 import com.example.nhahang.Models.VirtualTable;
+import com.example.nhahang.Utils.Auth;
 import com.example.nhahang.Utils.CircleAnimationUtil;
+import com.example.nhahang.Utils.Util;
 import com.example.nhahang.databinding.ActivitySelectProductActitvityBinding;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -59,7 +64,6 @@ public class SelectProductActitvity extends AppCompatActivity {
     ActivitySelectProductActitvityBinding binding;
     List<MenuModel> menuModelsList;
     MenuAdapter menuAdapter;
-    FirebaseAuth auth = FirebaseAuth.getInstance();
     Intent intent;
     TableModel tableModel;
     FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -89,6 +93,7 @@ public class SelectProductActitvity extends AppCompatActivity {
         setSupportActionBar(binding.toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
+        binding.toolbar.getNavigationIcon().setTint(ContextCompat.getColor(this, android.R.color.white));
         binding.toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -158,7 +163,7 @@ public class SelectProductActitvity extends AppCompatActivity {
         }
 
         orderMap.clear();
-        orderMap.put("staffId",auth.getUid());
+        orderMap.put("staffId", Auth.User_Uid);
         orderMap.put("currentDate",sCurrentDate);
         orderMap.put("currentTime",sCurrentTime);
         orderMap.put("totalQuantity",String.valueOf(totalQuanity));

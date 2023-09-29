@@ -72,10 +72,15 @@ public class ReservationDetailActivity extends AppCompatActivity {
         binding.toolBar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String newPrice = binding.totalPrice.getText().toString().trim();
-                if(!oldPrice.equals("") && !oldPrice.equals(newPrice)){
-                    dialog.show();
-                }else{
+                try {
+                    String newPrice = binding.totalPrice.getText().toString().trim();
+                    if(!oldPrice.equals("") && !oldPrice.equals(newPrice)){
+                        dialog.show();
+                    }else{
+                        onBackPressed();
+                        supportFinishAfterTransition();
+                    }
+                }catch (Exception e){
                     onBackPressed();
                     supportFinishAfterTransition();
                 }

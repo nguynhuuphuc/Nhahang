@@ -44,18 +44,84 @@
             android:padding="10dp" />
     </LinearLayout>
 
-    <LinearLayout
+        <LinearLayout
+            android:id="@+id/passowrdLl"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Mật khẩu:"
+                android:textColor="@color/black"
+                android:textSize="16sp" />
+
+            <EditText
+                android:id="@+id/passwordEt"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:background="@drawable/edit_text_rounded_corner"
+                android:elevation="5dp"
+                android:hint="Nhập mật khẩu"
+                android:inputType="phone"
+                android:minHeight="48dp"
+                android:padding="10dp" />
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="right">
+
+        <TextView
+            android:id="@+id/passwordLogin"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="@string/Password_Login"
+            android:textColor="@color/blue"
+            android:visibility="gone"/>
+        <TextView
+            android:id="@+id/otpLogin"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="@string/OTP_login"
+            android:textColor="@color/blue" />
+        </LinearLayout>
+        <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="100dp"
+        android:layout_height="match_parent"
         android:gravity="center_vertical"
         android:orientation="vertical">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:text="@string/send_otp"
+            android:textColor="@color/deep_sky_blue"
+            android:layout_margin="15dp"
+            android:visibility="gone"/>
+        <TextView
+            android:id="@+id/postResult"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+        <Button
+            android:id="@+id/loginBtn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Đăng nhập"
+            android:textColor="@color/white"
+            android:background="@drawable/btn_rounded_corner"/>
         <Button
             android:id="@+id/sendOtpBtn"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Gửi OTP"
             android:textColor="@color/white"
-            android:background="@drawable/btn_rounded_corner"/>
+            android:background="@drawable/btn_rounded_corner"
+            android:visibility="gone"/>
 
         <ProgressBar
             android:id="@+id/progressBar"

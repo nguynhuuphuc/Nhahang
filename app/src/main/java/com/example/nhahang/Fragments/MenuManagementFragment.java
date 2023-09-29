@@ -2,16 +2,17 @@ package com.example.nhahang.Fragments;
 
 import android.app.SearchManager;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -24,11 +25,14 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.nhahang.Adapters.ItemInMenuManagementAdapter;
 import com.example.nhahang.Adapters.MenuCategoryAdapter;
+import com.example.nhahang.AddNewProductActivity;
+import com.example.nhahang.EditProductActivity;
 import com.example.nhahang.Interfaces.IClickItemMenuCategoryListener;
 
 import com.example.nhahang.Models.MenuCategoryModel;
 import com.example.nhahang.Models.MenuModel;
 import com.example.nhahang.R;
+import com.example.nhahang.TrashActivity;
 import com.example.nhahang.databinding.FragmentMenuManagementBinding;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -89,17 +93,7 @@ public class MenuManagementFragment extends Fragment {
         });
         setHasOptionsMenu(true);
 
-//        db.collection("menu").get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-//            @Override
-//            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-//                if(task.isSuccessful()){
-//                    for (QueryDocumentSnapshot doc : task.getResult()){
-//                        db.collection("menu").document(doc.getId())
-//                                .update("isDelete",false);
-//                    }
-//                }
-//            }
-//        });
+
 
         binding.getRoot().getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
@@ -147,6 +141,20 @@ public class MenuManagementFragment extends Fragment {
                 if(Boolean.TRUE.equals(isChange)){
                     dbRealtime.getReference("productManagementChange").setValue(false);
                     displayItemByType(type);
+                    db.collection("menucategory").orderBy("id", Query.Direction.ASCENDING).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                            if(task.isSuccessful()){
+                                menuCategoryModelList.clear();
+                                for (QueryDocumentSnapshot doc : task.getResult()){
+                                    MenuCategoryModel  model = doc.toObject(MenuCategoryModel.class);
+                                    model.setDocumentId(doc.getId());
+                                    menuCategoryModelList.add(model);
+                                }
+                                menuCategoryAdapter.notifyDataSetChanged();
+                            }
+                        }
+                    });
                 }
             }
             @Override
@@ -287,6 +295,24 @@ public class MenuManagementFragment extends Fragment {
                 return false;
             }
         });
+
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        int id = item.getItemId();
+
+        switch (id) {
+            case R.id.addNewProduct:
+                startActivity(new Intent(getContext(), AddNewProductActivity.class));
+                return true;
+            case R.id.trash:
+                startActivity(new Intent(getContext(), TrashActivity.class));
+                return true;
+
+            default:
+                return super.onOptionsItemSelected(item);
+        }
 
     }
 

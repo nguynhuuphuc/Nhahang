@@ -8,7 +8,6 @@ import android.content.Intent;
 import android.graphics.Color;
 
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 
@@ -17,7 +16,6 @@ import android.view.ViewGroup;
 import android.webkit.MimeTypeMap;
 import android.widget.DatePicker;
 import android.widget.RadioButton;
-import android.widget.RadioGroup;
 import android.widget.Toast;
 
 
@@ -28,33 +26,43 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
-import androidx.transition.FragmentTransitionSupport;
 
 import com.bumptech.glide.Glide;
+import com.example.nhahang.Interfaces.ApiService;
 import com.example.nhahang.LoginActivity;
-import com.example.nhahang.MainActivity;
+import com.example.nhahang.Models.Employee;
+import com.example.nhahang.Models.Respones.ServerResponse;
 import com.example.nhahang.Models.UserModel;
+import com.example.nhahang.Models.Requests.UserUidRequest;
 import com.example.nhahang.R;
 
+import com.example.nhahang.Utils.Auth;
+import com.example.nhahang.Utils.Util;
 import com.example.nhahang.databinding.FragmentUserBinding;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class UserFragment extends Fragment {
     private FragmentUserBinding binding;
@@ -65,10 +73,8 @@ public class UserFragment extends Fragment {
     StorageReference storageRef = FirebaseStorage.getInstance().getReference();
 
     ActivityResultLauncher<Intent> activityResultLauncher;
-    String imgUrl;
 
     Uri imageUri;
-    UserModel userModel;
 
     @SuppressLint("ClickableViewAccessibility")
     @Nullable
@@ -119,14 +125,36 @@ public class UserFragment extends Fragment {
             }
         });
 
+
+
         binding.save.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Map<String, Object> user = new HashMap<>();
-                user.put("name", binding.nameEt.getText().toString().trim());
-                user.put("phone", binding.phoneEt.getText().toString().trim());
-                user.put("email", binding.emailEt.getText().toString().trim());
-                user.put("dateofbirth", binding.dateBornEt.getText().toString().trim());
+                Employee employee = new Employee();
+                employee.setUser_uid(Auth.User_Uid);
+                employee.setFull_name(binding.nameEt.getText().toString().trim());
+                employee.setEmail(binding.emailEt.getText().toString().trim());
+                String dateString = binding.dateBornEt.getText().toString().trim();
+                // Define a DateTimeFormatter for the specified format
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+                try {
+                    // Parse the date string into a LocalDate
+                    LocalDate parsedDate = LocalDate.parse(dateString, formatter);
+                    Instant instant = parsedDate.atStartOfDay(ZoneId.systemDefault()).toInstant();
+                    employee.setDate_of_birth(Date.from(instant));
+                    // Now you can work with the parsed LocalDate object
+                    System.out.println("Parsed Date: " + parsedDate);
+
+                    // You can also format the LocalDate object back to a string
+                    String formattedDate = parsedDate.format(formatter);
+                    System.out.println("Formatted Date: " + formattedDate);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    System.err.println("Error parsing date string.");
+                }
+
                 RadioButton sexChecked = null;
                 if (binding.maleRb.isChecked()) {
                     sexChecked = binding.maleRb;
@@ -138,31 +166,34 @@ public class UserFragment extends Fragment {
                     sexChecked = binding.ortherRb;
                 }
                 assert sexChecked != null;
-                user.put("sex", sexChecked.getText().toString().trim());
+                employee.setGender(sexChecked.getText().toString().trim());
 
                 inProgress(true);
                 enableEdit(false);
                 if (imageUri != null) {
-                    StorageReference imgReference = storageRef.child("user/" + auth.getUid() + "." + getFileExtension(imageUri));
-
+                    StorageReference imgReference = storageRef.child("user/employees/" + Auth.User_Uid + "." + getFileExtension(imageUri));
                     imgReference.putFile(imageUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                         @Override
                         public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                             imgReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                                 @Override
                                 public void onSuccess(Uri uri) {
-                                    imgUrl = uri.toString();
-                                    user.put("avatar", imgUrl);
-                                    db.collection("users").document(auth.getUid()).update(user)
-                                            .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                @Override
-                                                public void onComplete(@NonNull Task<Void> task) {
-                                                    if (task.isSuccessful()) {
-                                                        Toast.makeText(getContext(), "Ghi lại thành công", Toast.LENGTH_SHORT).show();
-                                                        AuthSigined();
-                                                    }
-                                                }
-                                            });
+                                    employee.setAvatar(uri.toString());
+                                    ApiService.apiService.updateEmployee(employee).enqueue(new Callback<ServerResponse>() {
+                                        @Override
+                                        public void onResponse(Call<ServerResponse> call, Response<ServerResponse> response) {
+                                            if(response.isSuccessful()) {
+                                                ServerResponse serverResponse = response.body();
+                                                Toast.makeText(getContext(), serverResponse.getMessage(), Toast.LENGTH_SHORT).show();
+                                                AuthSigined();
+                                            }
+                                        }
+
+                                        @Override
+                                        public void onFailure(Call<ServerResponse> call, Throwable t) {
+                                            Toast.makeText(getContext(), "Cập nhật thất bại", Toast.LENGTH_SHORT).show();
+                                        }
+                                    });
                                 }
 
                             });
@@ -172,16 +203,22 @@ public class UserFragment extends Fragment {
                 else
                 {
 
-                    db.collection("users").document(auth.getUid()).update(user)
-                            .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                @Override
-                                public void onComplete(@NonNull Task<Void> task) {
-                                    if (task.isSuccessful()) {
-                                        Toast.makeText(getContext(), "Ghi lại thành công", Toast.LENGTH_SHORT).show();
-                                        AuthSigined();
-                                    }
-                                }
-                            });
+                    ApiService.apiService.updateEmployee(employee).enqueue(new Callback<ServerResponse>() {
+                        @Override
+                        public void onResponse(Call<ServerResponse> call, Response<ServerResponse> response) {
+                            if(response.isSuccessful()) {
+                                ServerResponse serverResponse = response.body();
+                                Toast.makeText(getContext(), serverResponse.getMessage(), Toast.LENGTH_SHORT).show();
+                                AuthSigined();
+                            }
+
+                        }
+                        @Override
+                        public void onFailure(Call<ServerResponse> call, Throwable t) {
+                            Toast.makeText(getContext(), "Cập nhật thất bại", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+
                 }
             }
 
@@ -210,10 +247,11 @@ public class UserFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 auth.signOut();
-                startActivity(new Intent(getContext(), MainActivity.class));
+                Auth.SetNull();
+                startActivity(new Intent(getContext(), LoginActivity.class));
+                getActivity().finish();
             }
         });
-
 
         binding.dateBornEt.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -232,9 +270,6 @@ public class UserFragment extends Fragment {
         return view;
     }
 
-    private void uploadToFireStorage(Uri uri) {
-
-    }
     private String getFileExtension(Uri uri){
         ContentResolver contentResolver = getContext().getContentResolver();
         MimeTypeMap mime = MimeTypeMap.getSingleton();
@@ -261,34 +296,41 @@ public class UserFragment extends Fragment {
     }
 
     private void AuthSigined() {
-        try{
-            db.collection("users")
-                    .document(auth.getUid())
-                    .get()
-                    .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                        @Override
-                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                            if(task.isSuccessful()){
-                                DocumentSnapshot document = task.getResult();
-                                userModel = document.toObject(UserModel.class);
-                                setInformationView();
-                                inProgress(false);
-                            }
+            ApiService.apiService.getEmployee(new UserUidRequest(Auth.User_Uid)).enqueue(new Callback<Employee>() {
+                @Override
+                public void onResponse(Call<Employee> call, Response<Employee> response) {
+                    if(response.isSuccessful()){
+                        Employee employee = response.body();
+                        setInformationView(employee);
+                        inProgress(false);
+                    } else {
+                        // Request failed, handle the error
+                        int statusCode = response.code();
+                        // Check the status code for specific error handling
+                        switch (statusCode){
+                            case 500:
+                                break;
+                            case 401:
+                                break;
                         }
-                    });
+                    }
+                }
 
-        }catch (Exception e){
-            startActivity(new Intent(getContext(), LoginActivity.class));
-        }
+                @Override
+                public void onFailure(Call<Employee> call, Throwable t) {
+                    startActivity(new Intent(getContext(), LoginActivity.class));
+                }
+            });
     }
 
-    private void setInformationView() {
-        binding.nameTv.setText(userModel.getName());
-        binding.nameEt.setText(userModel.getName());
-        binding.phoneEt.setText(userModel.getPhone());
-        binding.emailEt.setText(userModel.getEmail());
-        binding.dateBornEt.setText(userModel.getDateofbirth());
-        switch (userModel.getSex()){
+    private void setInformationView(Employee employee) {
+        binding.nameTv.setText(employee.getFull_name());
+        binding.nameEt.setText(employee.getFull_name());
+        binding.phoneEt.setText(Auth.PhoneNumber);
+        binding.emailEt.setText(employee.getEmail());
+        if(employee.getDate_of_birth() != null)
+            Util.updateDateLabel(binding.dateBornEt,employee.getDate_of_birth());
+        switch (employee.getGender()){
             case "Nam":
                 binding.maleRb.setChecked(true);
                 break;
@@ -299,8 +341,8 @@ public class UserFragment extends Fragment {
                 binding.ortherRb.setChecked(true);
                 break;
         }
-        if(!userModel.getAvatar().isEmpty()){
-            Glide.with(getContext()).load(userModel.getAvatar()).into(binding.avatar);
+        if(employee.getAvatar() != null && !employee.getAvatar().isEmpty()){
+            Glide.with(getContext()).load(employee.getAvatar()).into(binding.avatar);
         }
 
     }
@@ -327,14 +369,14 @@ public class UserFragment extends Fragment {
         int nonBorderEditText = R.drawable.edit_text_rounded_corner;
         if(b){
             binding.nameEt.setElevation(5);
-            binding.phoneEt.setElevation(5);
+
             binding.emailEt.setElevation(5);
             binding.dateBornEt.setElevation(5);
 
 
 
             binding.nameEt.setBackgroundResource(borderEditText);
-            binding.phoneEt.setBackgroundResource(borderEditText);
+
             binding.emailEt.setBackgroundResource(borderEditText);
             binding.dateBornEt.setBackgroundResource(borderEditText);
 
@@ -355,7 +397,7 @@ public class UserFragment extends Fragment {
             binding.changeAvatarTv.setVisibility(View.GONE);
         }
         binding.nameEt.setEnabled(b);
-        binding.phoneEt.setEnabled(b);
+        binding.phoneEt.setEnabled(false);
         binding.emailEt.setEnabled(b);
         binding.dateBornEt.setEnabled(b);
         binding.maleRb.setEnabled(b);

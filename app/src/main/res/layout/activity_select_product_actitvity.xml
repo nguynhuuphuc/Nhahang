@@ -11,7 +11,8 @@
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         app:navigationIcon="@drawable/close_icon"
-        android:background="@drawable/gradient_background">
+        app:popupTheme="@style/ToolbarColoredNavIcon"
+        android:background="@color/deep_sky_blue">
 
         <LinearLayout
             android:id="@+id/viewNameTableLl"
@@ -26,14 +27,14 @@
                 android:layout_height="wrap_content"
                 android:text="Bàn số: "
                 android:textSize="18sp"
-                android:textColor="@color/black"/>
+                android:textColor="@color/white"/>
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="1"
                 android:id="@+id/nameTableTv"
                 android:textSize="18sp"
-                android:textColor="@color/black"/>
+                android:textColor="@color/white"/>
         </LinearLayout>
 
     </androidx.appcompat.widget.Toolbar>
@@ -85,7 +86,7 @@
             android:layout_height="50dp"
             android:orientation="horizontal"
             android:layout_alignParentBottom="true"
-            android:background="@drawable/gradient_background"
+            android:background="@color/white"
             android:weightSum="2"
             android:gravity="center">
             <androidx.cardview.widget.CardView

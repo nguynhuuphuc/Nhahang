@@ -5,40 +5,36 @@ import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
 import com.example.nhahang.Adapters.ViewPagerAdapter;
-import com.example.nhahang.Fragments.HomeFragment;
-import com.example.nhahang.Models.UserModel;
+import com.example.nhahang.Interfaces.ApiService;
+import com.example.nhahang.Models.Employee;
+import com.example.nhahang.Models.Requests.UserUidRequest;
+import com.example.nhahang.Utils.Auth;
 import com.example.nhahang.databinding.ActivityMainBinding;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.material.navigation.NavigationBarView;
 import com.google.android.material.navigation.NavigationView;
-import com.google.android.play.integrity.internal.a;
+
+
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FirebaseFirestore;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
 
-public class MainActivity extends AppCompatActivity {
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
+
+    public class MainActivity extends AppCompatActivity {
 
     private ActivityMainBinding binding;
-    FirebaseFirestore db = FirebaseFirestore.getInstance();
-    FirebaseAuth auth = FirebaseAuth.getInstance();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,28 +43,17 @@ public class MainActivity extends AppCompatActivity {
         View view = binding.getRoot();
         setContentView(view);
 
+        FirebaseAuth auth = FirebaseAuth.getInstance();
+
 
         setSupportActionBar(binding.toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
+        Auth.User_Uid = getIntent().getStringExtra("user_uid");
+        Auth.PhoneNumber = getIntent().getStringExtra("phoneNumber");
+        if(Auth.User_Uid == null){
+            Auth.User_Uid = auth.getUid();
+        }
         authSigined();
-        try {
-            db.collection("users").document(auth.getUid())
-                    .get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-                        @Override
-                        public void onSuccess(DocumentSnapshot documentSnapshot) {
-                            UserModel model = documentSnapshot.toObject(UserModel.class);
-                            if(model == null) return;
-                            if(model.getPosition().equals("manager")){
-                                ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(MainActivity.this,binding.drawerLayout,binding.toolbar,R.string.navigation_drawer_open,R.string.navigation_drawer_close);
-                                binding.drawerLayout.addDrawerListener(toggle);
-                                toggle.syncState();
-                            }
-                        }
-                    });
-        }catch (Exception ignored){}
-
-
-
 
         setUpViewPager();
         binding.viewPager.setUserInputEnabled(false);
@@ -122,41 +107,30 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void authSigined() {
-        try{
-            db.collection("users")
-                    .document(auth.getUid())
-                    .get()
-                    .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                        @Override
-                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                            if(task.isSuccessful()){
-                                DocumentSnapshot documet = task.getResult();
-                                if(documet.exists()){
-                                    String s = "Xin chào "+ documet.getString("name");
-                                    Toast.makeText(MainActivity.this, s, Toast.LENGTH_SHORT).show();
-                                }
-                                else{
-                                    Map<String, Object> user = new HashMap<>();
-                                    user.put("name",auth.getCurrentUser().getPhoneNumber());
-                                    user.put("phone",auth.getCurrentUser().getPhoneNumber());
-                                    user.put("email","");
-                                    user.put("dateofbirth","");
-                                    user.put("sex","");
-                                    user.put("avatar","");
-                                    user.put("position","staff");
-                                    db.collection("users")
-                                            .document(auth.getUid())
-                                            .set(user);
-                                }
-                            }
+            UserUidRequest userUidRequest = new UserUidRequest(Auth.User_Uid);
+            ApiService.apiService.getEmployee(userUidRequest).enqueue(new Callback<Employee>() {
+                @Override
+                public void onResponse(Call<Employee> call, Response<Employee> response) {
+                    if(response.isSuccessful()){
+                        Employee employee = response.body();
+                        assert employee != null;
+                        String s = "Xin chào "+ employee.getFull_name();
+                        Toast.makeText(MainActivity.this, s, Toast.LENGTH_SHORT).show();
+                        if(employee.getPosition_id().equals("QL")){
+                            ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(MainActivity.this, binding.drawerLayout, binding.toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+                            binding.drawerLayout.addDrawerListener(toggle);
+                            toggle.syncState();
                         }
-                    });
-
-
-        }
-        catch (Exception e){
-            startActivity(new Intent(this,LoginActivity.class));
-        }
+                        Intent finishIntent = new Intent(LoginActivity.ACTION_FINISH_ACTIVITY);
+                        sendBroadcast(finishIntent);
+                    }
+                }
+                @Override
+                public void onFailure(Call<Employee> call, Throwable t) {
+                    startActivity(new Intent(MainActivity.this,LoginActivity.class));
+                    finish();
+                }
+            });
 
     }
 

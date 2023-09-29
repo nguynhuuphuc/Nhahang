@@ -11,4 +11,7 @@
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="send_otp"><u>Gửi OTP</u></string>
+    <string name="OTP_login"><u>Đăng nhập bằng OTP</u></string>
+    <string name="Password_Login"><u>Đăng nhập với mật khẩu</u></string>
 </resources>

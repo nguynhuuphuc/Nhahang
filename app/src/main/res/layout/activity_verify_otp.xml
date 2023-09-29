@@ -6,77 +6,161 @@
     android:layout_height="match_parent"
     tools:context=".VerifyOtpActivity">
 
-    <LinearLayout
+    <androidx.appcompat.widget.Toolbar
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:navigationIcon="@drawable/close_icon"
+        android:id="@+id/toolbar"/>
+
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="20dp"
-        android:layout_marginEnd="20dp"
-        android:layout_marginBottom="20dp"
-        android:orientation="vertical">
-
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="200dp"
-            android:src="@drawable/logo" />
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="+84XXX XXX XXX"
-            android:textColor="@color/black"
-            android:gravity="center"
-            android:layout_margin="5dp"
-            android:id="@+id/phoneNumberTv"/>
+        android:layout_below="@id/toolbar">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:orientation="horizontal">
-
-
-            <EditText
-                android:id="@+id/otpEt"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="10dp"
-                android:background="@drawable/edit_text_rounded_corner"
-                android:elevation="5dp"
-                android:hint="Nhập OTP"
-                android:inputType="phone"
-                android:padding="10dp" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="100dp"
-            android:gravity="center_vertical"
+            android:layout_height="match_parent"
+            android:layout_marginStart="20dp"
+            android:layout_below="@id/toolbar"
+            android:layout_marginEnd="20dp"
+            android:layout_marginBottom="20dp"
             android:orientation="vertical">
+            <ImageView
+                android:id="@+id/logoIv"
+                android:layout_width="wrap_content"
+                android:layout_height="200dp"
+                android:src="@drawable/logo" />
 
-            <Button
-                android:id="@+id/enterBtn"
+            <TextView
+                android:id="@+id/verifyPhoneNumberTv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Xác thực số điện thoại"
+                android:textColor="@color/black"
+                android:layout_gravity="center"
+                android:textSize="24sp"
+                android:visibility="gone"/>
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/btn_rounded_corner"
-                android:text="Xác nhập" />
-            <ProgressBar
-                android:id="@+id/progressBar"
-                android:layout_width="32dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center" />
+                android:orientation="vertical"
+                android:id="@+id/verifyOtpContentLl">
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="+84XXX XXX XXX"
+                    android:textColor="@color/black"
+                    android:gravity="center"
+                    android:layout_margin="5dp"
+                    android:id="@+id/phoneNumberTv"/>
 
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:orientation="horizontal">
+                    <EditText
+                        android:id="@+id/otpEt"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="10dp"
+                        android:background="@drawable/edit_text_rounded_corner"
+                        android:elevation="5dp"
+                        android:hint="Nhập OTP"
+                        android:inputType="phone"
+                        android:padding="10dp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="100dp"
+                    android:gravity="center_vertical"
+                    android:orientation="vertical">
+
+                    <Button
+                        android:id="@+id/enterBtn"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/btn_rounded_corner"
+                        android:text="Xác nhập" />
+                    <ProgressBar
+                        android:id="@+id/progressBar"
+                        android:layout_width="32dp"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center" />
+
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/resendOtpTv"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:gravity="center"
+                    android:text="@string/resend_otp"
+                    android:textColor="@color/blue" />
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/createPasswordContent"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Nhập mật khẩu:"
+                        android:textSize="16sp"
+                        android:textColor="@color/black" />
+
+                    <EditText
+                        android:id="@+id/passwordEt"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="10dp"
+                        android:background="@drawable/edit_text_rounded_corner"
+                        android:elevation="5dp"
+                        android:hint="Nhập mật khẩu"
+                        android:inputType="textPassword"
+                        android:padding="10dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Nhập mật lại khẩu:"
+                        android:textSize="16sp"
+                        android:textColor="@color/black" />
+
+                    <EditText
+                        android:id="@+id/rePasswordEt"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="10dp"
+                        android:background="@drawable/edit_text_rounded_corner"
+                        android:elevation="5dp"
+                        android:hint="Nhập mật lại khẩu"
+                        android:inputType="textPassword"
+                        android:padding="10dp" />
+
+                </LinearLayout>
+
+                <Button
+                    android:layout_marginTop="30dp"
+                    android:id="@+id/enterPasswordBtn"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/btn_rounded_corner"
+                    android:text="Xác nhập" />
+
+            </LinearLayout>
         </LinearLayout>
 
-
-
-        <TextView
-            android:id="@+id/resendOtpTv"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:gravity="center"
-            android:text="@string/resend_otp"
-            android:textColor="@color/blue" />
-    </LinearLayout>
+    </ScrollView>
 
 </RelativeLayout>
