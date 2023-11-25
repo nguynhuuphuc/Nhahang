@@ -6,6 +6,7 @@
     <color name="red">#FF0000</color>
     <color name="neon_red">#FF3131</color>
     <color name="scarlet">#FF2400</color>
+    <color name="bright_orange">#FFAC1C</color>
     <color name="teal_200">#FF03DAC5</color>
     <color name="teal_700">#FF018786</color>
     <color name="lime_green">#32CD32</color>
@@ -15,8 +16,10 @@
     <color name="light_gray">#D3D3D3</color>
     <color name="silver">#C0C0C0</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="deep_sky_blue">#00BFFF	</color>
+    <color name="deep_sky_blue">#00BFFF</color>
+    <color name="lighter_deep_sky_blue">#53D4FF</color>
     <color name="light_blue">#add8e6</color>
+    <color name="lighter_blue">#c1e1ec</color>
     <color name="blue">#0000FF</color>
     <color name="ghost_white">#f8f8ff</color>
     <color name="dark_white">#E1D9D1</color>

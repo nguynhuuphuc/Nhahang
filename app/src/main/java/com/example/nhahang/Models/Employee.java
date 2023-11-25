@@ -14,6 +14,7 @@ public class Employee implements Serializable {
     private String position_id;
     private String avatar;
     private String phone_number;
+    private boolean is_delete;
 
     public Employee() {
     }
@@ -41,6 +42,14 @@ public class Employee implements Serializable {
         this.position_id = position_id;
         this.avatar = avatar;
         this.phone_number = phone_number;
+    }
+
+    public boolean isIs_delete() {
+        return is_delete;
+    }
+
+    public void setIs_delete(boolean is_delete) {
+        this.is_delete = is_delete;
     }
 
     public String getPhone_number() {

@@ -76,7 +76,6 @@
                 android:id="@+id/quantityNumberEt"
                 android:layout_width="60dp"
                 android:layout_height="wrap_content"
-                android:text="1"
                 android:textAlignment="center"
                 android:inputType="number"
                 android:background="@null"/>
@@ -88,8 +87,6 @@
                 android:src="@drawable/add_icon"
                 android:background="@drawable/circle_background_for_add_remove_btn"
                 app:tint="#5ea2ce" />
-
-
 
         </LinearLayout>
 

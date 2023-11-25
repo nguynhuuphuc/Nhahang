@@ -8,8 +8,10 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.content.ContentResolver;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
@@ -59,21 +61,34 @@ public class UserInformationManagementActivity extends AppCompatActivity {
 
     private ActivityUserInformationManagementBinding binding;
     private Employee employee;
-    Calendar mCalendar = Calendar.getInstance();
-
-    private FirebaseDatabase dbRealtime = FirebaseDatabase.getInstance();
-    StorageReference storageRef = FirebaseStorage.getInstance().getReference();
-
-    ActivityResultLauncher<Intent> activityResultLauncher;
-
-    Uri imageUri;
-
+    private Calendar mCalendar = Calendar.getInstance();
+    private StorageReference storageRef = FirebaseStorage.getInstance().getReference();
+    private ActivityResultLauncher<Intent> activityResultLauncher;
+    private ActivityResultLauncher<Intent> launcher;
+    private Uri imageUri;
+    private AlertDialog deleteDialog;
+    private boolean isUpdate;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityUserInformationManagementBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         enableEdit(false);
+        launcher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
+            @Override
+            public void onActivityResult(ActivityResult o) {
+                if(o.getResultCode() == RESULT_OK){
+                    Intent data = o.getData();
+                    Employee employee_deleted = (Employee) data.getSerializableExtra("employee_deleted");
+                    Intent intentResult = new Intent();
+                    intentResult.putExtra("action","DELETE");
+                    intentResult.putExtra("employee_deleted",employee_deleted);
+                    setResult(RESULT_OK,intentResult);
+                    finish();
+                }
+            }
+        });
+
         activityResultLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 new ActivityResultCallback<ActivityResult>() {
@@ -94,7 +109,13 @@ public class UserInformationManagementActivity extends AppCompatActivity {
         binding.toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                onBackPressed();
+                if(isUpdate){
+                    Intent intentResult = new Intent();
+                    intentResult.putExtra("action","UPDATE");
+                    intentResult.putExtra("employee",employee);
+                    setResult(RESULT_OK,intentResult);
+                }
+
                 finish();
             }
         });
@@ -111,6 +132,15 @@ public class UserInformationManagementActivity extends AppCompatActivity {
                 updateLabel();
             }
         };
+
+        binding.deleteCv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                buildDeleteAlertDialog();
+                deleteDialog.show();
+            }
+        });
+
         binding.dateBornEt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -155,8 +185,14 @@ public class UserInformationManagementActivity extends AppCompatActivity {
                 String user_uid = employee.getUser_uid();
                 if(!employee.getFull_name().equals(binding.nameEt.getText().toString().trim()))
                     employee.setFull_name(binding.nameEt.getText().toString().trim());
-                if(!employee.getEmail().equals(binding.emailEt.getText().toString().trim()))
-                    employee.setEmail(binding.emailEt.getText().toString().trim());
+
+                try {
+                    if(!employee.getEmail().equals(binding.emailEt.getText().toString().trim()))
+                        employee.setEmail(binding.emailEt.getText().toString().trim());
+                }catch (Exception ignored){}
+
+
+
                 String dateString = binding.dateBornEt.getText().toString().trim();
                 // Define a DateTimeFormatter for the specified format
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
@@ -195,7 +231,7 @@ public class UserInformationManagementActivity extends AppCompatActivity {
                 inProgress(true);
                 enableEdit(false);
                 if (imageUri != null) {
-                    StorageReference imgReference = storageRef.child("user/" + employee.getUser_uid() + "." + getFileExtension(imageUri));
+                    StorageReference imgReference = storageRef.child("user/employees/" + employee.getUser_uid() + "." + getFileExtension(imageUri));
 
                     imgReference.putFile(imageUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                         @Override
@@ -204,19 +240,20 @@ public class UserInformationManagementActivity extends AppCompatActivity {
                                 @Override
                                 public void onSuccess(Uri uri) {
                                     employee.setAvatar(uri.toString());
-                                    ApiService.apiService.updateEmployee(employee).enqueue(new Callback<ServerResponse>() {
+                                    ApiService.apiService.updateEmployee(employee).enqueue(new Callback<Employee>() {
                                         @Override
-                                        public void onResponse(Call<ServerResponse> call, Response<ServerResponse> response) {
+                                        public void onResponse(Call<Employee> call, Response<Employee> response) {
                                             if(response.isSuccessful()) {
-                                                ServerResponse serverResponse = response.body();
-                                                Toast.makeText(UserInformationManagementActivity.this, serverResponse.getMessage(), Toast.LENGTH_SHORT).show();
+                                                isUpdate = true;
+                                                employee = response.body();
                                                 reloadUserInfo(user_uid);
                                                 inProgress(false);
                                             }
                                         }
 
                                         @Override
-                                        public void onFailure(Call<ServerResponse> call, Throwable t) {
+                                        public void onFailure(Call<Employee> call, Throwable t) {
+                                            isUpdate = false;
                                             Toast.makeText(UserInformationManagementActivity.this, "Cập nhật thất bại", Toast.LENGTH_SHORT).show();
                                             reloadUserInfo(user_uid);
                                             inProgress(false);
@@ -231,19 +268,20 @@ public class UserInformationManagementActivity extends AppCompatActivity {
                 }
                 else
                 {
-                    ApiService.apiService.updateEmployee(employee).enqueue(new Callback<ServerResponse>() {
+                    ApiService.apiService.updateEmployee(employee).enqueue(new Callback<Employee>() {
                         @Override
-                        public void onResponse(Call<ServerResponse> call, Response<ServerResponse> response) {
+                        public void onResponse(Call<Employee> call, Response<Employee> response) {
                             if(response.isSuccessful()) {
-                                ServerResponse serverResponse = response.body();
-                                Toast.makeText(UserInformationManagementActivity.this, serverResponse.getMessage(), Toast.LENGTH_SHORT).show();
+                                isUpdate = true;
+                                employee = response.body();
                                 reloadUserInfo(user_uid);
                                 inProgress(false);
                             }
 
                         }
                         @Override
-                        public void onFailure(Call<ServerResponse> call, Throwable t) {
+                        public void onFailure(Call<Employee> call, Throwable t) {
+                            isUpdate = false;
                             Toast.makeText(UserInformationManagementActivity.this, "Cập nhật thất bại", Toast.LENGTH_SHORT).show();
                             reloadUserInfo(user_uid);
                             inProgress(false);
@@ -254,6 +292,31 @@ public class UserInformationManagementActivity extends AppCompatActivity {
 
         });
     }
+
+    private void buildDeleteAlertDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        String message = "Bạn có chắc chắn muốn xóa tài khoản của "+ employee.getFull_name() + " không ?";
+        builder.setMessage(message)
+                .setTitle("Xóa tài khoản");
+        builder.setPositiveButton("Chắc chắn có", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Intent intent = new Intent(UserInformationManagementActivity.this,VerifyOtpActivity.class);
+                intent.putExtra("command","deleteAccount");
+                intent.putExtra("phone",employee.getPhone_number());
+                intent.putExtra("employee",employee);
+                launcher.launch(intent);
+            }
+        });
+        builder.setNegativeButton("Không", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        deleteDialog = builder.create();
+    }
+
     private void reloadUserInfo(String user_uid){
         UserUidRequest userUidRequest = new UserUidRequest(user_uid);
         ApiService.apiService.getEmployee(userUidRequest).enqueue(new Callback<Employee>() {
@@ -311,6 +374,7 @@ public class UserInformationManagementActivity extends AppCompatActivity {
         binding.edit.setVisibility(viewEdit);
         binding.save.setVisibility(viewSave);
         binding.cancel.setVisibility(viewCancel);
+        binding.deleteCv.setVisibility(viewSave);
 
         enableInput(b);
 

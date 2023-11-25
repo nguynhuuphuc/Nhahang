@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".PaymentMethodsActivity">
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:navigationIcon="@drawable/arrow_back_ios_icon"
+        app:title="Phương thức thanh toán">
+
+    </androidx.appcompat.widget.Toolbar>
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cashMethodCv"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        app:cardCornerRadius="4dp">
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="5dp"
+            android:background="@drawable/border_black_line_background">
+            <ImageView
+                android:id="@+id/icon_cash"
+                android:layout_width="40dp"
+                android:layout_height="30dp"
+                android:src="@drawable/paid_ic"/>
+            <TextView
+                android:id="@+id/name_payment"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Tiền mặt"
+                android:textColor="@color/black"
+                android:layout_centerVertical="true"
+                android:layout_toEndOf="@id/icon_cash"/>
+        </RelativeLayout>
+
+    </androidx.cardview.widget.CardView>
+    <androidx.cardview.widget.CardView
+        android:id="@+id/qrMethodCv"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        app:cardCornerRadius="4dp">
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="5dp"
+            android:background="@drawable/border_black_line_background">
+            <ImageView
+                android:id="@+id/icon_qr"
+                android:layout_width="40dp"
+                android:layout_height="30dp"
+                android:src="@drawable/vnpaylogo"/>
+            <TextView
+                android:id="@+id/qrMethod"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="VNPAY"
+                android:textColor="@color/black"
+                android:layout_centerVertical="true"
+                android:layout_toEndOf="@id/icon_qr"/>
+        </RelativeLayout>
+
+    </androidx.cardview.widget.CardView>
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/exchangeMethodCv"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        app:cardCornerRadius="4dp">
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="5dp"
+            android:background="@drawable/border_black_line_background">
+            <ImageView
+                android:id="@+id/icon_currency_exchange"
+                android:layout_width="40dp"
+                android:layout_height="30dp"
+                android:src="@drawable/currency_exchange_icon"/>
+            <TextView
+                android:id="@+id/bankingMethod"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Chuyển khoảng ngân hàng"
+                android:textColor="@color/black"
+                android:layout_centerVertical="true"
+                android:layout_toEndOf="@id/icon_currency_exchange"/>
+        </RelativeLayout>
+
+    </androidx.cardview.widget.CardView>
+
+</LinearLayout>

@@ -2,6 +2,10 @@ package com.example.nhahang.Adapters;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.res.ColorStateList;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,7 +15,9 @@ import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -19,8 +25,9 @@ import com.bumptech.glide.Glide;
 
 import com.bumptech.glide.request.RequestOptions;
 import com.example.nhahang.Interfaces.IItemMenu;
+import com.example.nhahang.Interfaces.IOrderItemQuantityListener;
 import com.example.nhahang.Models.MenuModel;
-import com.example.nhahang.Models.VirtualTable;
+import com.example.nhahang.Models.DishModel;
 import com.example.nhahang.R;
 
 import java.util.ArrayList;
@@ -32,19 +39,21 @@ public class MenuAdapter extends RecyclerView.Adapter<MenuAdapter.ViewHolder> im
     private List<MenuModel> menuModelsList;
     private IItemMenu iItemMenu;
     private Context context;
-    private List<VirtualTable> virtualTableList = new ArrayList<>();
-    private List<MenuModel> menuModelsListOld;
+    private List<DishModel> dishModelList = new ArrayList<>();
+    private final List<MenuModel> menuModelsListOld;
 
     public MenuAdapter(List<MenuModel> menuModelsList, Context context, IItemMenu iItemMenu) {
         this.menuModelsList = menuModelsList;
         this.iItemMenu = iItemMenu;
         this.context = context;
         this.menuModelsListOld = menuModelsList;
+
     }
 
-    public void setVirtualTableList(List<VirtualTable> virtualTableList) {
-        this.virtualTableList = virtualTableList;
+    public void setVirtualTableList(List<DishModel> dishModelList) {
+        this.dishModelList = dishModelList;
     }
+
 
     @NonNull
     @Override
@@ -55,13 +64,17 @@ public class MenuAdapter extends RecyclerView.Adapter<MenuAdapter.ViewHolder> im
     @Override
     public void onBindViewHolder(@NonNull MenuAdapter.ViewHolder holder, @SuppressLint("RecyclerView") int position) {
         MenuModel models = menuModelsList.get(position);
-        if(!virtualTableList.isEmpty()){
-            for(VirtualTable vt : virtualTableList){
-                if(vt.getDocumentId().equals(models.getDocumentId())){
+
+        holder.quantityEt.setTextColor(context.getResources().getColor(R.color.black));
+        if(!dishModelList.isEmpty()){
+            for(DishModel vt : dishModelList){
+                if(models.getDocumentId().equals(vt.getDocumentId())){
                     holder.quantityEt.setText(vt.getQuantity());
                 }
             }
         }
+        holder.quantityEt.setEnabled(false);
+
         holder.name.setText(models.getName());
         holder.price.setText(models.getPrice());
         if(models.isAdded()){
@@ -92,10 +105,11 @@ public class MenuAdapter extends RecyclerView.Adapter<MenuAdapter.ViewHolder> im
                             holder.imageView,
                             holder.quantityLl,
                             holder.checkIv);
-                    iItemMenu.onClickItemMenuListener(models);
+                    models.setQuantity("1");
+                    iItemMenu.onClickItemMenuListener(models,position);
                     return;
                 }
-                iItemMenu.onClickItemMenuListener(models);
+                iItemMenu.onClickItemMenuListener(models,position);
             }
         });
         holder.minusIv.setOnClickListener(new View.OnClickListener() {
@@ -113,6 +127,7 @@ public class MenuAdapter extends RecyclerView.Adapter<MenuAdapter.ViewHolder> im
                     newNumber = Integer.parseInt(holder.quantityEt.getText().toString()) - 1;
                     holder.quantityEt.setText(String.valueOf(newNumber));
                 }
+                holder.quantityEt.setSelection(String.valueOf(newNumber).length());
                 iItemMenu.onClickMinusListener(models, signal, newNumber);
 
             }
@@ -122,6 +137,7 @@ public class MenuAdapter extends RecyclerView.Adapter<MenuAdapter.ViewHolder> im
             public void onClick(View v) {
                 int newNumber = Integer.parseInt(holder.quantityEt.getText().toString()) +1;
                 holder.quantityEt.setText(String.valueOf(newNumber));
+                holder.quantityEt.setSelection(String.valueOf(newNumber).length());
                 iItemMenu.onClickPlusListener(models,newNumber);
             }
         });
@@ -162,15 +178,18 @@ public class MenuAdapter extends RecyclerView.Adapter<MenuAdapter.ViewHolder> im
             @Override
             protected FilterResults performFiltering(CharSequence constraint) {
                 String sSearch = constraint.toString();
-                if(sSearch.isEmpty()){
+                if(sSearch.isEmpty() || sSearch.equals("00")){
                     menuModelsList = menuModelsListOld;
-                }else{
+                }
+                else {
                     List<MenuModel> list = new ArrayList<>();
                     for (MenuModel menuModel : menuModelsListOld){
-                        if(menuModel.getName().toLowerCase().contains(sSearch.toLowerCase())){
+                        if(menuModel.getName().toLowerCase().contains(sSearch.toLowerCase()) ||
+                            menuModel.getType().equals(sSearch)){
                             list.add(menuModel);
                         }
                     }
+
                     menuModelsList = list;
                 }
 

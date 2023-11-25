@@ -13,7 +13,7 @@
         android:id="@+id/deleteIv"
         android:layout_width="85dp"
         android:layout_height="match_parent"
-        android:background="#ff5722"
+        android:background="@color/red"
         android:src="@drawable/delete_icon"
         android:gravity="center"
         android:paddingEnd="24dp"

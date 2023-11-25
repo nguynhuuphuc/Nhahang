@@ -10,18 +10,15 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.bumptech.glide.Glide;
-import com.example.nhahang.Interfaces.IClickItemReservationDetail;
 import com.example.nhahang.Interfaces.IClickViewInNoteProductListeners;
 import com.example.nhahang.Models.MenuModel;
-import com.example.nhahang.Models.ProductInReservationModel;
-import com.example.nhahang.Models.VirtualTable;
+import com.example.nhahang.Models.DishModel;
 import com.example.nhahang.R;
 import com.example.nhahang.databinding.FragmentNoteProductBottomSheetBinding;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.google.android.material.button.MaterialButtonToggleGroup;
-import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -29,7 +26,7 @@ import java.util.Locale;
 
 public class NoteProductFragment extends BottomSheetDialogFragment {
     private IClickViewInNoteProductListeners iClickViewInNoteProductListeners;
-    private VirtualTable vt;
+    private DishModel vt;
     private MenuModel model;
     private FragmentNoteProductBottomSheetBinding binding;
     private int quantityProduct;
@@ -39,7 +36,7 @@ public class NoteProductFragment extends BottomSheetDialogFragment {
     private boolean ignoreFormatting;
 
 
-    public NoteProductFragment(MenuModel model,VirtualTable vt, IClickViewInNoteProductListeners iClickViewInNoteProductListeners){
+    public NoteProductFragment(MenuModel model, DishModel vt, IClickViewInNoteProductListeners iClickViewInNoteProductListeners){
         this.model = model;
         this.iClickViewInNoteProductListeners = iClickViewInNoteProductListeners;
         this.vt = vt;

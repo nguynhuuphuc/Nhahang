@@ -8,23 +8,30 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Toast;
 
+import com.example.nhahang.Interfaces.ApiService;
+import com.example.nhahang.Models.Employee;
+import com.example.nhahang.Models.OrderModel;
+import com.example.nhahang.Models.Requests.OrderRequest;
+import com.example.nhahang.Models.Requests.UserUidRequest;
 import com.example.nhahang.Models.ReservationModel;
-import com.example.nhahang.Models.UserModel;
+import com.example.nhahang.Models.TableModel;
 import com.example.nhahang.databinding.ActivityInforReservationBinding;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-import java.util.ArrayList;
-import java.util.List;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class InforReservationActivity extends AppCompatActivity {
 
     private ActivityInforReservationBinding binding;
     private String documentId;
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private TableModel tableModel;
+    private OrderModel orderModel;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,19 +48,45 @@ public class InforReservationActivity extends AppCompatActivity {
             }
         });
         Intent intent = getIntent();
-        documentId = intent.getStringExtra("documentId");
-        db.collection("reservations").document(documentId)
-                .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+        tableModel = (TableModel) intent.getSerializableExtra("table");
+        orderModel = (OrderModel) intent.getSerializableExtra("order");
+
+        ApiService.apiService.getEmployee(new UserUidRequest(orderModel.getCreated_by()))
+                .enqueue(new Callback<Employee>() {
                     @Override
-                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                        if(task.isSuccessful()) {
-                            DocumentSnapshot doc = task.getResult();
-                            ReservationModel model = doc.toObject(ReservationModel.class);
-                            assert model != null;
-                            viewData(model);
+                    public void onResponse(Call<Employee> call, Response<Employee> response) {
+                        if(response.isSuccessful()){
+                            Employee employee = response.body();
+                            binding.staffName.setText(employee.getFull_name());
                         }
                     }
+
+                    @Override
+                    public void onFailure(Call<Employee> call, Throwable t) {
+
+                    }
                 });
+
+
+
+
+        try {
+            documentId = intent.getStringExtra("documentId");
+            db.collection("reservations").document(documentId)
+                    .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                            if(task.isSuccessful()) {
+                                DocumentSnapshot doc = task.getResult();
+                                ReservationModel model = doc.toObject(ReservationModel.class);
+                                assert model != null;
+                                viewData(model);
+                            }
+                        }
+                    });
+        }catch (Exception ignored){
+        }
+
     }
 
     private void inProgress(boolean isIn) {
@@ -69,19 +102,23 @@ public class InforReservationActivity extends AppCompatActivity {
         inProgress(true);
         String time = model.getCurrentTime() + " " + model.getCurrentDate();
         binding.time.setText(time);
-        db.collection("users").document(model.getStaffId())
-                .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                        if(task.isSuccessful()){
-                            DocumentSnapshot doc = task.getResult();
-                            UserModel user = doc.toObject(UserModel.class);
-                            assert user != null;
-                            binding.staffName.setText(user.getName());
-                            inProgress(false);
-                        }
-                    }
-                });
+        UserUidRequest request = new UserUidRequest(model.getStaffId());
+        ApiService.apiService.getEmployee(request).enqueue(new Callback<Employee>() {
+            @Override
+            public void onResponse(Call<Employee> call, Response<Employee> response) {
+                if(response.isSuccessful()){
+                    Employee employee = response.body();
+                    assert employee != null;
+                    binding.staffName.setText(employee.getFull_name());
+                    inProgress(false);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Employee> call, Throwable t) {
+                Toast.makeText(InforReservationActivity.this, "Lỗi", Toast.LENGTH_SHORT).show();
+            }
+        });
 
     }
 

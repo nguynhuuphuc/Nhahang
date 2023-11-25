@@ -3,4 +3,20 @@
     <style name="ToolbarTitleStyle" parent="TextAppearance.Widget.AppCompat.Toolbar.Title">
         <item name="android:textAlignment">center</item>
     </style>
+
+    <style name="PopupMenuStyle" parent="Widget.AppCompat.PopupMenu">
+        <!-- Customize text size -->
+        <item name="android:textSize">12sp</item>
+    </style>
+
+    <style name="CustomOutlinedBoxExposedDropdownMenu" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
+        <item name="boxStrokeColor">@color/gray</item>
+        <item name="boxStrokeWidthFocused">2dp</item>
+        <item name="boxStrokeWidth">2dp</item>
+        <item name="endIconTint">@color/gray</item>
+        <item name="hintTextColor">@color/black</item>
+        <!-- Add other styling attributes as needed -->
+    </style>
+
+
 </resources>

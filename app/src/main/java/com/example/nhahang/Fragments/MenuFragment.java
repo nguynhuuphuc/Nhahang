@@ -85,7 +85,7 @@ public class MenuFragment extends Fragment {
             }
 
             @Override
-            public void onClickItemMenuListener(MenuModel models) {
+            public void onClickItemMenuListener(MenuModel models,int position) {
 
             }
 

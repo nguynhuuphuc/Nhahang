@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        app:showAsAction="ifRoom"
+        android:id="@+id/action_more"
+        android:icon="@drawable/more_vert_icon"
+        android:title="MoreInfo"
+        app:iconTint="@color/white">
+        <menu>
+            <item
+                android:id="@+id/infoReseration"
+                android:icon="@drawable/info_icon"
+                android:title="Thông tin đơn hàng"
+                app:iconTint="@color/white"
+                app:showAsAction="never" />
+            <item
+                android:icon="@drawable/change_status_icon"
+                android:id="@+id/changeTable"
+                android:title="Chuyển bàn"
+                app:iconTint="@color/white"
+                app:showAsAction="never"/>
+
+            <item
+                android:icon="@drawable/join_arrows_icon"
+                android:id="@+id/joinTable"
+                android:title="Gộp bàn"
+                app:iconTint="@color/white"
+                app:showAsAction="never"/>
+
+            <item
+                android:icon="@drawable/split_arrows_icon"
+                android:id="@+id/splitTable"
+                android:title="Tách bàn"
+                app:iconTint="@color/white"
+                app:showAsAction="never"/>
+
+            <item
+                android:icon="@drawable/history_icon"
+                android:id="@+id/hisNotifyRes"
+                android:title="Lịch sử báo bếp"
+                app:iconTint="@color/white"
+                app:showAsAction="never"/>
+        </menu>
+    </item>
+</menu>

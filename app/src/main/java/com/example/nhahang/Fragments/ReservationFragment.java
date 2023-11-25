@@ -18,13 +18,17 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.example.nhahang.Adapters.CategoryTableAdapter;
 import com.example.nhahang.Adapters.TableAdapter;
+import com.example.nhahang.Interfaces.ApiService;
 import com.example.nhahang.Interfaces.IClickItemCategoryTableListener;
 import com.example.nhahang.Interfaces.IClickItemTableListener;
 import com.example.nhahang.Models.CategoryTableModel;
+import com.example.nhahang.Models.LocationModel;
+import com.example.nhahang.Models.Requests.UserUidRequest;
 import com.example.nhahang.Models.TableModel;
 import com.example.nhahang.R;
 import com.example.nhahang.ReservationDetailActivity;
 import com.example.nhahang.SelectProductActitvity;
+import com.example.nhahang.Utils.Auth;
 import com.example.nhahang.databinding.FragmentHomeBinding;
 import com.example.nhahang.databinding.FragmentReservationBinding;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -40,17 +44,24 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.protobuf.Api;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 public class ReservationFragment extends Fragment {
     private FragmentHomeBinding binding;
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
     private final FirebaseDatabase dbRealtime = FirebaseDatabase.getInstance();
-    private String typeTb = "01";
+    private String location = "01";
+    private List<LocationModel> locationList = new ArrayList<>();
+    private CategoryTableAdapter categoryTableAdapter;
 
     @Nullable
     @Override
@@ -60,12 +71,10 @@ public class ReservationFragment extends Fragment {
 
 
         binding.typeTableRv.setLayoutManager(new LinearLayoutManager(getContext(),LinearLayoutManager.HORIZONTAL,false));
-        List<CategoryTableModel> categoryTableModelList = new ArrayList<>();
-
         List<TableModel> tableModelList = new ArrayList<>();
-        TableAdapter tableAdapter = new TableAdapter(tableModelList, new IClickItemTableListener() {
+        TableAdapter tableAdapter = new TableAdapter(getContext(),tableModelList, new IClickItemTableListener() {
             @Override
-            public void onClickItemTableListener(TableModel tableModel, LinearLayout tablelabelLl,String oldPrice) {
+            public void onClickItemTableListener(TableModel tableModel, LinearLayout tablelabelLl,String oldPrice,int index) {
                 Intent intent = new Intent(getContext(), ReservationDetailActivity.class);
                 intent.putExtra("table",tableModel);
                 intent.putExtra("oldPrice",oldPrice);
@@ -80,43 +89,43 @@ public class ReservationFragment extends Fragment {
         GridLayoutManager gridLayoutManager = new GridLayoutManager(getContext(),2);
         binding.tableRv.setLayoutManager(gridLayoutManager);
         binding.tableRv.setAdapter(tableAdapter);
-        displayTable(typeTb,tableModelList,tableAdapter);
+        displayTable(location,tableModelList,tableAdapter);
 
-        CategoryTableAdapter categoryTableAdapter = new CategoryTableAdapter(categoryTableModelList, new IClickItemCategoryTableListener() {
+      categoryTableAdapter = new CategoryTableAdapter(locationList, new IClickItemCategoryTableListener() {
             @Override
-            public void onClickItemCategoryTableListener(CategoryTableModel categoryTableModel) {
-                typeTb = categoryTableModel.getType();
-                displayTable(typeTb,tableModelList,tableAdapter);
+            public void onClickItemCategoryTableListener(LocationModel locationModel) {
+
             }
 
         });
 
         binding.typeTableRv.setAdapter(categoryTableAdapter);
+        viewCategories();
 
 
-        InProgress(true);
-        db.collection("categorytable")
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if(task.isSuccessful()){
-                            for (QueryDocumentSnapshot document: task.getResult()){
-                                CategoryTableModel model = document.toObject(CategoryTableModel.class);
-                                categoryTableModelList.add(model);
-                            }
-                            categoryTableAdapter.notifyDataSetChanged();
-                            InProgress(false);
-                        }
-                    }
-                });
+
+//        db.collection("categorytable")
+//                .get()
+//                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+//                    @Override
+//                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+//                        if(task.isSuccessful()){
+//                            for (QueryDocumentSnapshot document: task.getResult()){
+//                                CategoryTableModel model = document.toObject(CategoryTableModel.class);
+//                                categoryTableModelList.add(model);
+//                            }
+//                            //categoryTableAdapter.notifyDataSetChanged();
+//                            InProgress(false);
+//                        }
+//                    }
+//                });
         dbRealtime.getReference("orders").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 Boolean isChanged = snapshot.getValue(Boolean.class);
                 if(Boolean.TRUE.equals(isChanged)){
                     dbRealtime.getReference("changedResTable").setValue(false);
-                    displayTable(typeTb,tableModelList,tableAdapter);
+                    displayTable(location,tableModelList,tableAdapter);
                 }
             }
             @Override
@@ -130,7 +139,7 @@ public class ReservationFragment extends Fragment {
                 Boolean isChanged = snapshot.getValue(Boolean.class);
                 if(Boolean.TRUE.equals(isChanged)){
                     dbRealtime.getReference("changedResTable").setValue(false);
-                    displayTable(typeTb,tableModelList,tableAdapter);
+                    displayTable(location,tableModelList,tableAdapter);
                 }
             }
 
@@ -145,7 +154,7 @@ public class ReservationFragment extends Fragment {
                 Boolean isChanged = snapshot.getValue(Boolean.class);
                 if(Boolean.TRUE.equals(isChanged)){
                     dbRealtime.getReference("updateRes").setValue(false);
-                    displayTable(typeTb,tableModelList,tableAdapter);
+                    displayTable(location,tableModelList,tableAdapter);
                 }
             }
 
@@ -156,6 +165,26 @@ public class ReservationFragment extends Fragment {
         });
 
         return view;
+    }
+
+    private void viewCategories() {
+        InProgress(true);
+        ApiService.apiService.getAllLocations(new UserUidRequest(Auth.User_Uid))
+                .enqueue(new Callback<ArrayList<LocationModel>>() {
+                    @Override
+                    public void onResponse(Call<ArrayList<LocationModel>> call, Response<ArrayList<LocationModel>> response) {
+                        if(response.isSuccessful()){
+                            assert response.body()!=null;
+                            locationList.addAll(response.body());
+
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<ArrayList<LocationModel>> call, Throwable t) {
+
+                    }
+                });
     }
 
     void InProgress(boolean isIn){

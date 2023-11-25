@@ -4,22 +4,26 @@
     <item
         app:showAsAction="always"
         android:icon="@drawable/more_vert_icon"
-        android:title="">
+        android:title=""
+        app:iconTint="@color/white">
         <menu>
             <item
                 android:id="@+id/infoReseration"
                 android:icon="@drawable/info_icon"
                 android:title="Thông tin đơn hàng"
+                app:iconTint="@color/white"
                 app:showAsAction="never"/>
             <item
                 android:icon="@drawable/cancel_icon"
                 android:id="@+id/cancelReservation"
                 android:title="Hủy đơn hàng"
+                app:iconTint="@color/white"
                 app:showAsAction="never"/>
             <item
                 android:icon="@drawable/history_icon"
                 android:id="@+id/hisNotifyRes"
                 android:title="Lịch sử báo bếp"
+                app:iconTint="@color/white"
                 app:showAsAction="never"/>
         </menu>
     </item>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/action_notification"
+        android:icon="@drawable/ic_notifications"
+        android:title="Notification"
+        app:iconTint="@color/white"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_message"
+        android:icon="@drawable/ic_message"
+        android:title="InBox"
+        app:iconTint="@color/white"
+        app:showAsAction="ifRoom" />
+    <item
+        app:showAsAction="ifRoom"
+        android:id="@+id/action_more"
+        android:icon="@drawable/more_vert_icon"
+        android:title="MoreInfo"
+        app:iconTint="@color/white"/>
+
+</menu>

@@ -11,7 +11,7 @@ public interface IItemMenu {
             ImageView imgV,
             LinearLayout quantityLl,
             ImageView checkIv);
-    void onClickItemMenuListener(MenuModel models);
+    void onClickItemMenuListener(MenuModel models,int position);
     void onClickPlusListener(MenuModel models,int value);
     void onClickMinusListener(MenuModel models, String signal,int value);
 

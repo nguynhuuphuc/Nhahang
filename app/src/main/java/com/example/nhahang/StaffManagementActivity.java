@@ -1,14 +1,21 @@
 package com.example.nhahang;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
+import androidx.core.content.ContextCompat;
+import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -43,10 +50,10 @@ import retrofit2.Response;
 
 public class StaffManagementActivity extends AppCompatActivity {
     private ActivityStaffManagementBinding binding;
-    private FirebaseDatabase dbRealtime = FirebaseDatabase.getInstance();
     private StaffManagementAdapter staffManagementAdapter;
     private List<Employee> employees;
     private SearchView searchView;
+    private ActivityResultLauncher<Intent> launcher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,6 +62,44 @@ public class StaffManagementActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         setSupportActionBar(binding.toolbar);
+
+        launcher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
+            @Override
+            public void onActivityResult(ActivityResult o) {
+                if(o.getResultCode() == RESULT_OK){
+                    Intent data = o.getData();
+                    if(data != null){
+                        String action = data.getStringExtra("action");
+                        switch (action){
+                            case "DELETE":
+                                Employee employee_deleted = (Employee) data.getSerializableExtra("employee_deleted");
+                                staffManagementAdapter.deleteEmployee(employee_deleted);
+                                break;
+
+                            case "UPDATE":
+                                Employee employee = (Employee) data.getSerializableExtra("employee");
+                                staffManagementAdapter.updateEmployee(employee);
+                                break;
+
+                            case "NEW ACCOUNT":
+                                Employee newEmployee = (Employee) data.getSerializableExtra("new_employee");
+                                staffManagementAdapter.addEmployee(newEmployee);
+                                break;
+                        }
+
+                    }
+                }
+            }
+        });
+
+        Drawable icon = binding.toolbar.getNavigationIcon();
+        if (icon != null) {
+            icon = DrawableCompat.wrap(icon);
+            DrawableCompat.setTint(icon, ContextCompat.getColor(this, R.color.black));
+            binding.toolbar.setNavigationIcon(icon);
+        }
+
+
 
         binding.toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
@@ -65,25 +110,9 @@ public class StaffManagementActivity extends AppCompatActivity {
         });
         binding.staffManageRV.setLayoutManager(new LinearLayoutManager(this, RecyclerView.VERTICAL,false));
         employees = new ArrayList<>();
-        staffManagementAdapter = new StaffManagementAdapter(employees,this);
+        staffManagementAdapter = new StaffManagementAdapter(employees,this,launcher);
         binding.staffManageRV.setAdapter(staffManagementAdapter);
 
-
-        dbRealtime.getReference("staffManagementChange").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                Boolean isChange = snapshot.getValue(Boolean.class);
-                if(Boolean.TRUE.equals(isChange)){
-                    dbRealtime.getReference("staffManagementChange").setValue(false);
-                    loadDataRV();
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
         loadDataRV();
 
 
@@ -157,13 +186,13 @@ public class StaffManagementActivity extends AppCompatActivity {
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-
+                staffManagementAdapter.getFilter().filter(query);
                 return false;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
-
+                staffManagementAdapter.getFilter().filter(newText);
                 return false;
             }
         });
@@ -177,7 +206,7 @@ public class StaffManagementActivity extends AppCompatActivity {
 
         switch (id) {
             case R.id.add:
-               startActivity(new Intent(this,RegisterNewStaffActivity.class));
+               launcher.launch(new Intent(this,RegisterNewStaffActivity.class));
             default:
                 return super.onOptionsItemSelected(item);
         }

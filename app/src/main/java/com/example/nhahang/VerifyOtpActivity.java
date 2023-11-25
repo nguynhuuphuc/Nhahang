@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -13,14 +14,15 @@ import com.example.nhahang.Interfaces.ApiService;
 import com.example.nhahang.Models.AccountModel;
 import com.example.nhahang.Models.Employee;
 import com.example.nhahang.Models.Requests.CreatePasswordRequest;
+import com.example.nhahang.Models.Requests.UserUidRequest;
 import com.example.nhahang.Models.Respones.ServerResponse;
+import com.example.nhahang.Utils.PasswordUtil;
 import com.example.nhahang.Utils.Util;
 import com.example.nhahang.ViewModels.AttributeWatcherViewModel;
 import com.example.nhahang.ViewModels.CheckVerifyViewModel;
 import com.example.nhahang.databinding.ActivityVerifyOtpBinding;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseException;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
@@ -47,6 +49,7 @@ public class VerifyOtpActivity extends AppCompatActivity {
 
 
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -72,6 +75,10 @@ public class VerifyOtpActivity extends AppCompatActivity {
 
         sendOtp(phoneNumber,false);
 
+        binding.passwordEt.setOnTouchListener(Util.ShowOrHidePass(binding.passwordEt));
+        binding.rePasswordEt.setOnTouchListener(Util.ShowOrHidePass(binding.rePasswordEt));
+
+
         binding.enterPasswordBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -83,14 +90,19 @@ public class VerifyOtpActivity extends AppCompatActivity {
                     return;
                 }
 
-                CreatePasswordRequest request = new CreatePasswordRequest(mAuth.getUid(),rePassword);
+                String hashPassword = PasswordUtil.hashPassword(rePassword);
+                CreatePasswordRequest request = new CreatePasswordRequest(mAuth.getUid(),hashPassword);
                 ApiService.apiService.createPassword(request).enqueue(new Callback<ServerResponse>() {
                     @Override
                     public void onResponse(@NonNull Call<ServerResponse> call, @NonNull Response<ServerResponse> response) {
                         if(response.isSuccessful()){
                             ServerResponse res = response.body();
                             assert res != null;
-                            Toast.makeText(VerifyOtpActivity.this, res.getMessage(), Toast.LENGTH_SHORT).show();
+                            if(command.equals("forgetPassword")){
+                                Toast.makeText(VerifyOtpActivity.this, "Đã đặt lại mật khẩu", Toast.LENGTH_SHORT).show();
+                            }else{
+                                Toast.makeText(VerifyOtpActivity.this, res.getMessage(), Toast.LENGTH_SHORT).show();
+                            }
                             Intent intent = new Intent(VerifyOtpActivity.this,MainActivity.class);
                             intent.putExtra("phoneNumber",phoneNumber);
                             startActivity(intent);
@@ -131,7 +143,7 @@ public class VerifyOtpActivity extends AppCompatActivity {
     }
 
     private void setView() {
-        if ("register".equals(command)) {
+        if (command.equals("register") || command.equals("deleteAccount")) {
             binding.logoIv.setVisibility(View.GONE);
             binding.verifyPhoneNumberTv.setVisibility(View.VISIBLE);
         }
@@ -193,6 +205,15 @@ public class VerifyOtpActivity extends AppCompatActivity {
             public void onComplete(@NonNull Task<AuthResult> task) {
                 if(task.isSuccessful()){
                     switch (command){
+                        case "deleteAccount":
+                            Employee employeeD = (Employee) getIntent().getSerializableExtra("employee");
+                            deleteAccount(employeeD);
+                            mAuth.signOut();
+                            break;
+                        case "forgetPassword":
+                            createPasswordView();
+                            setInProgress(false);
+                            break;
                         case "login":
                             setInProgress(true);
                             Util.checkAccount(VerifyOtpActivity.this,phoneNumber);
@@ -216,20 +237,57 @@ public class VerifyOtpActivity extends AppCompatActivity {
                             });
                             break;
                         case "register":
-                            Employee employee = new Employee();
-                            employee = (Employee) getIntent().getExtras().getSerializable("employee");
+                            Employee employee = (Employee) getIntent().getExtras().getSerializable("employee");
                             employee.setUser_uid(mAuth.getUid());
                             mAuth.signOut();
                             saveInfoEmployee(employee);
-                            finish();
                             break;
                     }
-
-
                 }else {
                     Toast.makeText(VerifyOtpActivity.this, "OTP không đúng", Toast.LENGTH_SHORT).show();
                     setInProgress(false);
                 }
+            }
+        });
+    }
+
+    private void getEmployeeAndFinish(Employee employee) {
+        ApiService.apiService.getEmployeeById(new UserUidRequest(employee.getUser_uid())).enqueue(new Callback<Employee>() {
+            @Override
+            public void onResponse(Call<Employee> call, Response<Employee> response) {
+                if(response.isSuccessful()){
+                   Employee employee = response.body();
+                   Intent intentResult  = new Intent();
+                   intentResult.putExtra("action", "NEW ACCOUNT");
+                   intentResult.putExtra("new_employee",employee);
+                   setResult(RESULT_OK,intentResult);
+                   finish();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Employee> call, Throwable t) {
+
+            }
+        });
+    }
+
+    private void deleteAccount(Employee employee) {
+        ApiService.apiService.deleteEmployee(new UserUidRequest(employee.getUser_uid())).enqueue(new Callback<Employee>() {
+            @Override
+            public void onResponse(Call<Employee> call, Response<Employee> response) {
+                if(response.isSuccessful()){
+                    Employee employee = response.body();
+                    Intent intentResult = new Intent();
+                    intentResult.putExtra("employee_deleted",employee);
+                    setResult(RESULT_OK,intentResult);
+                    finish();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Employee> call, Throwable t) {
+                Toast.makeText(VerifyOtpActivity.this, "Lỗi server", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -240,17 +298,17 @@ public class VerifyOtpActivity extends AppCompatActivity {
     }
 
     private void saveAccount(Employee employee,boolean is_verify) {
+        CheckVerifyViewModel viewModel = new ViewModelProvider(VerifyOtpActivity.this).get(CheckVerifyViewModel.class);
         AccountModel account = new AccountModel(phoneNumber,null,employee.getUser_uid(),employee.getPosition_id(),is_verify);
         ApiService.apiService.addNewAccount(account).enqueue(new Callback<ServerResponse>() {
             @Override
             public void onResponse(Call<ServerResponse> call, Response<ServerResponse> response) {
                 if(response.isSuccessful()){
                     ServerResponse res = response.body();
-                    finish();
-                    CheckVerifyViewModel viewModel = new ViewModelProvider(VerifyOtpActivity.this).get(CheckVerifyViewModel.class);
                     // Đặt giá trị isVerify thành true
-                    viewModel.setIsVerify(true);
+                    viewModel.setIsVerify(is_verify);
                     Toast.makeText(VerifyOtpActivity.this, res.getMessage(), Toast.LENGTH_SHORT).show();
+                    getEmployeeAndFinish(employee);
 
 
                 }else {

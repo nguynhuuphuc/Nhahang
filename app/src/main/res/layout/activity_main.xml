@@ -8,6 +8,7 @@
     tools:openDrawer="start">
 
     <RelativeLayout
+        android:id="@+id/contentRl"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
         <androidx.appcompat.widget.Toolbar
@@ -44,11 +45,12 @@
             app:itemTextColor="@color/custom_color_bottom_nav" />
     </RelativeLayout>
 
-    <com.google.android.material.navigation.NavigationView
-        android:layout_width="wrap_content"
-        android:id="@+id/navigation_view"
-        android:layout_height="match_parent"
-        android:layout_gravity="start"
-        app:menu="@menu/navigation_start_menu"/>
+
+        <com.google.android.material.navigation.NavigationView
+            android:layout_width="wrap_content"
+            android:id="@+id/navigation_view"
+            android:layout_height="match_parent"
+            android:layout_gravity="start"
+            app:menu="@menu/navigation_start_menu"/>
 
 </androidx.drawerlayout.widget.DrawerLayout>

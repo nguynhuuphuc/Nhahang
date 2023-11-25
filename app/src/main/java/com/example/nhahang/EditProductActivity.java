@@ -179,28 +179,13 @@ public class EditProductActivity extends AppCompatActivity {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
+                binding.recommendTypeRV.setVisibility(View.VISIBLE);
+                menuCategoryAdapter.getFilter().filter(s.toString());
 
             }
 
             @Override
             public void afterTextChanged(Editable s) {
-                binding.recommendTypeRV.setVisibility(View.VISIBLE);
-                db.collection("menucategory").orderBy("id", Query.Direction.ASCENDING).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if(task.isSuccessful()){
-                            menuCategoryModelList.clear();
-                            for (QueryDocumentSnapshot doc : task.getResult()){
-                                MenuCategoryModel model = doc.toObject(MenuCategoryModel.class);
-                                model.setDocumentId(doc.getId());
-                                if (model == null) continue;
-                                if (!model.getId().equals("00"))
-                                    menuCategoryModelList.add(model);
-                            }
-                            menuCategoryAdapter.getFilter().filter(s.toString());
-                        }
-                    }
-                });
 
             }
         });

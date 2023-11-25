@@ -15,7 +15,7 @@ public class PasswordLoginActivity extends AppCompatActivity {
 
     private ActivityPasswordLoginBinding binding;
     private String phoneNumber;
-    private FirebaseFirestore db = FirebaseFirestore.getInstance();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

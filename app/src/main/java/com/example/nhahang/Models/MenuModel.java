@@ -26,6 +26,16 @@ public class MenuModel implements Serializable {
         this.type = type;
     }
 
+    public MenuModel(String detail, String name, String img, String price, String quantity, String type, Boolean isDelete) {
+        this.detail = detail;
+        this.name = name;
+        this.img = img;
+        this.price = price;
+        this.quantity = quantity;
+        this.type = type;
+        this.isDelete = isDelete;
+    }
+
     public Boolean getDelete() {
         return isDelete;
     }

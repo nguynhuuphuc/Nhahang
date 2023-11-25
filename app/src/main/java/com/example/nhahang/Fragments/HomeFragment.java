@@ -1,12 +1,9 @@
 package com.example.nhahang.Fragments;
+import static android.app.Activity.RESULT_OK;
 
 
-
-import android.app.ActivityOptions;
 import android.content.Intent;
-import android.nfc.Tag;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,6 +11,8 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityOptionsCompat;
@@ -21,58 +20,127 @@ import androidx.core.view.ViewCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.example.nhahang.Adapters.CategoryTableAdapter;
 import com.example.nhahang.Adapters.TableAdapter;
 
+import com.example.nhahang.Interfaces.ApiService;
 import com.example.nhahang.Interfaces.IClickItemCategoryTableListener;
 import com.example.nhahang.Interfaces.IClickItemTableListener;
-import com.example.nhahang.Models.CategoryTableModel;
+import com.example.nhahang.Interfaces.IUpdateTablesListener;
+import com.example.nhahang.Models.LocationModel;
+import com.example.nhahang.Models.MessageEvent;
+import com.example.nhahang.Models.NotificationModel;
+import com.example.nhahang.Models.Requests.UserUidRequest;
 import com.example.nhahang.Models.TableModel;
 
+import com.example.nhahang.MyApplication;
+import com.example.nhahang.OrderDetailActivity;
+import com.example.nhahang.R;
 import com.example.nhahang.SelectProductActitvity;
+import com.example.nhahang.Utils.Auth;
+import com.example.nhahang.Utils.GridSpacingItemDecoration;
+import com.example.nhahang.Utils.MyWebSocketClient;
+import com.example.nhahang.ViewModels.WebSocketViewModel;
 import com.example.nhahang.databinding.FragmentHomeBinding;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.Query;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 
-import java.io.Serializable;
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
-public class HomeFragment extends Fragment{
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
+public class HomeFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener{
 
     private FragmentHomeBinding binding;
-    FirebaseFirestore db = FirebaseFirestore.getInstance();
-    FirebaseDatabase dbRealtime = FirebaseDatabase.getInstance();
-    String location = "01";
+
+    private List<TableModel> tableModelList = new ArrayList<>();
+    private TableAdapter tableAdapter;
+    private List<LocationModel> locationList = new ArrayList<>();
+    private CategoryTableAdapter categoryTableAdapter;
+    private ActivityResultLauncher<Intent> launcher;
+    private String location = "1";
+    private MyApplication myApp;
+    private MyWebSocketClient webSocketClient;
+    private WebSocketViewModel viewModel;
+    private boolean loadTableSuccess = false, loadCateSuccess = false;
+    private boolean isEventBusReceive;
+
+
+    public boolean isLoadTableSuccess() {
+        return loadTableSuccess;
+    }
+
+    public void setLoadTableSuccess(boolean loadTableSuccess) {
+        this.loadTableSuccess = loadTableSuccess;
+    }
+
+    public boolean isLoadCateSuccess() {
+        return loadCateSuccess;
+    }
+
+    public void setLoadCateSuccess(boolean loadCateSuccess) {
+        this.loadCateSuccess = loadCateSuccess;
+    }
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         binding = FragmentHomeBinding.inflate(getLayoutInflater());
         View view = binding.getRoot();
 
+        myApp = (MyApplication) requireActivity().getApplication();
+        webSocketClient = myApp.getWebSocketClient();
 
-        binding.typeTableRv.setLayoutManager(new LinearLayoutManager(getContext(),LinearLayoutManager.HORIZONTAL,false));
-        List<CategoryTableModel> categoryTableModelList = new ArrayList<>();
+        launcher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == RESULT_OK) {
+                        Intent data = result.getData();
+                        if (data != null) {
+                            TableModel updateTable = (TableModel) data.getSerializableExtra("table");
+                            String action = data.getExtras().getString("action","");
+                            switch (action){
+                                case "StartOrderDetail":
+                                    Intent intent = new Intent(requireActivity(),OrderDetailActivity.class);
+                                    intent.putExtra("table",updateTable);
+                                    sendNotifyNewOrder(updateTable);
+                                    launcher.launch(intent);
+                                    break;
+                                case "PaidOrder":
+                                    updatePaidTable(updateTable.getTable_id());
+                                    break;
 
-        List<TableModel> tableModelList = new ArrayList<>();
-        TableAdapter tableAdapter = new TableAdapter(tableModelList, new IClickItemTableListener() {
+                                case "ChangeOrderTable":
+                                    List<TableModel> changeTables = (List<TableModel>) data.getSerializableExtra("changeTables");
+                                    tableAdapter.updateTable(changeTables);
+                                    break;
+                                default:
+                                    tableAdapter.updateTable(updateTable);
+                                    break;
+                            }
+
+                        }
+                    }
+                });
+
+
+
+
+
+        binding.typeTableRv.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
+        tableAdapter = new TableAdapter(getContext(),tableModelList, new IClickItemTableListener() {
             @Override
-            public void onClickItemTableListener(TableModel tableModel, LinearLayout tablelabelLl,String oldPrice) {
+            public void onClickItemTableListener(TableModel tableModel, LinearLayout tablelabelLl,String oldPrice,int index) {
+                if(!tableModel.is_occupied()){
                 Intent intent = new Intent(getContext(), SelectProductActitvity.class);
                 intent.putExtra("table",tableModel);
                 intent.putExtra("activity","Home");
@@ -81,75 +149,155 @@ public class HomeFragment extends Fragment{
                         tablelabelLl,
                         Objects.requireNonNull(ViewCompat.getTransitionName(tablelabelLl))
                 );
-                startActivity(intent,options.toBundle());
+                launcher.launch(intent,options);
+                }else{
+                    Intent intent = new Intent(getContext(), OrderDetailActivity.class);
+                    intent.putExtra("table",tableModel);
+                    ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(
+                            requireActivity(),
+                            tablelabelLl,
+                            Objects.requireNonNull(ViewCompat.getTransitionName(tablelabelLl))
+                    );
+                    launcher.launch(intent,options);
+                }
             }
         });
         GridLayoutManager gridLayoutManager = new GridLayoutManager(getContext(),2);
         binding.tableRv.setLayoutManager(gridLayoutManager);
+
+        // Đặt ItemDecoration để tạo khoảng trống ở trên và dưới các hàng của lưới
+        int spacingInPixels = getResources().getDimensionPixelSize(R.dimen.grid_spacing); // Đặt giá trị tùy ý
+        binding.tableRv.addItemDecoration(new GridSpacingItemDecoration(2, spacingInPixels, true, 0));
+
         binding.tableRv.setAdapter(tableAdapter);
-        displayTable(location,tableModelList,tableAdapter);
 
-        CategoryTableAdapter categoryTableAdapter = new CategoryTableAdapter(categoryTableModelList, new IClickItemCategoryTableListener() {
+
+
+        categoryTableAdapter = new CategoryTableAdapter(locationList, new IClickItemCategoryTableListener() {
             @Override
-            public void onClickItemCategoryTableListener(CategoryTableModel categoryTableModel) {
-                location = categoryTableModel.getType();
-                displayTable(location,tableModelList,tableAdapter);
-                InProgress(false);
+            public void onClickItemCategoryTableListener(LocationModel locationModel) {
+                location = String.valueOf(locationModel.getLocation_id());
+                tableAdapter.getFilter().filter(location);
             }
 
-        });
-        dbRealtime.getReference("orders").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                Boolean isChanged = snapshot.getValue(Boolean.class);
-                if(Boolean.TRUE.equals(isChanged)){
-                    displayTable(location,tableModelList,tableAdapter);
-                    dbRealtime.getReference("orders").setValue(false);
-                }
-            }
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
-        dbRealtime.getReference("changedResTable").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                Boolean isChanged = snapshot.getValue(Boolean.class);
-                if(Boolean.TRUE.equals(isChanged)){
-                    displayTable(location,tableModelList,tableAdapter);
-                    dbRealtime.getReference("changedResTable").setValue(false);
-                }
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
         });
 
         binding.typeTableRv.setAdapter(categoryTableAdapter);
+        binding.SwipeRefreshLayout.setOnRefreshListener(this);
 
-        InProgress(true);
-        db.collection("categorytable")
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if(task.isSuccessful()){
-                            for (QueryDocumentSnapshot document: task.getResult()){
-                                CategoryTableModel model = document.toObject(CategoryTableModel.class);
-                                categoryTableModelList.add(model);
-                            }
-                            categoryTableAdapter.notifyDataSetChanged();
-                            InProgress(false);
-                        }
-                    }
-                });
+        viewTableCategories();
+        getAllTables();
+
 
 
         return view;
+    }
+
+    private void sendNotifyNewOrder(TableModel tableModel) {
+        JSONObject object = new JSONObject();
+        try {
+            object.put("from",Auth.User_Uid);
+            JSONObject message = new JSONObject();
+            message.put("order_id",tableModel.getOrder_id());
+            message.put("status","đã thêm đơn mới cho " + tableModel.getTable_name());
+            message.put("new_table_id",tableModel.getTable_id());
+            object.put("message",message);
+            webSocketClient.send(object.toString());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void updatePaidTable(int table_id) {
+        InProgress(true);
+        final TableModel[] tableModel = {new TableModel()};
+        tableModel[0].setTable_id(table_id);
+        ApiService.apiService.getTableById(tableModel[0]).enqueue(new Callback<TableModel>() {
+            @Override
+            public void onResponse(Call<TableModel> call, Response<TableModel> response) {
+                if(response.isSuccessful()){
+                    tableModel[0] = response.body();
+                    tableAdapter.updateTable(tableModel[0]);
+                    InProgress(false);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<TableModel> call, Throwable t) {
+                Toast.makeText(myApp, "Lỗi sever", Toast.LENGTH_SHORT).show();
+                InProgress(false);
+
+            }
+        });        
+    }
+
+    
+    private void getAllTables() {
+        if(!binding.SwipeRefreshLayout.isRefreshing()){
+            InProgress(true);
+        }
+        if(!tableModelList.isEmpty()){
+            tableModelList.clear();
+        }
+        ApiService.apiService.getAllTables(new UserUidRequest(Auth.User_Uid))
+                .enqueue(new Callback<ArrayList<TableModel>>() {
+                    @Override
+                    public void onResponse(Call<ArrayList<TableModel>> call, Response<ArrayList<TableModel>> response) {
+                        if(response.isSuccessful()){
+                            assert response.body() !=null  ;
+                            tableModelList.addAll(response.body());
+                            tableAdapter.getFilter().filter(location);
+                            if(!binding.SwipeRefreshLayout.isRefreshing()){
+                                InProgress(false);
+                            }else{
+                                setLoadTableSuccess(true);
+                                stopRefreshing();
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<ArrayList<TableModel>> call, Throwable t) {
+
+                    }
+                });
+    }
+
+    private void stopRefreshing() {
+        if(isLoadCateSuccess() && isLoadTableSuccess()){
+            binding.SwipeRefreshLayout.setRefreshing(false);
+        }
+    }
+
+    private void viewTableCategories() {
+        if(!binding.SwipeRefreshLayout.isRefreshing()){
+            InProgress(true);
+        }
+        if(!locationList.isEmpty()){
+            locationList.clear();
+        }
+        ApiService.apiService.getAllLocations(new UserUidRequest(Auth.User_Uid))
+                .enqueue(new Callback<ArrayList<LocationModel>>() {
+                    @Override
+                    public void onResponse(Call<ArrayList<LocationModel>> call, Response<ArrayList<LocationModel>> response) {
+                        if(response.isSuccessful()){
+                            assert response.body() != null;
+                            locationList.addAll(response.body());
+                            categoryTableAdapter.notifyDataSetChanged();
+                            if(!binding.SwipeRefreshLayout.isRefreshing()){
+                                InProgress(false);
+                            }else{
+                                setLoadCateSuccess(true);
+                                stopRefreshing();
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<ArrayList<LocationModel>> call, Throwable t) {
+
+                    }
+                });
     }
 
     void InProgress(boolean isIn){
@@ -161,82 +309,40 @@ public class HomeFragment extends Fragment{
             binding.progressBar.setVisibility(View.GONE);
             binding.tableRv.setVisibility(View.VISIBLE);
         }
+    }
+
+    @Override
+    public void onRefresh() {
+        viewTableCategories();
+        getAllTables();
 
     }
 
-    private void displayTable(String location, List<TableModel> tableModelList, TableAdapter tableAdapter) {
-        InProgress(true);
-        tableModelList.clear();
-        db.collection("tables")
-                .orderBy("id", Query.Direction.DESCENDING)
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()){
-                            tableModelList.clear();
-                            for (QueryDocumentSnapshot documet: task.getResult()){
-                                TableModel model = documet.toObject(TableModel.class);
-                                if(model.getLocation().equals(location) && model.getStatus().trim().isEmpty()){
-                                    model.setDocumentId(documet.getId());
-                                    tableModelList.add(0,model);
-                                }
-                            }
-                            tableAdapter.notifyDataSetChanged();
-                            InProgress(false);
-                        }
-                    }
-                });
-
+    @Override
+    public void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
     }
-    void InsertTable(){
-        HashMap<String,Object> table = new HashMap<>();
-        for (int i = 1; i < 11; i++) {
-            String id;
-            if(i == 10) id = String.valueOf(i);
-            else id = "0"+i;
-            table.put("id",id);
-            table.put("description","");
-            table.put("status"," ");
-            table.put("location","01");
-            db.collection("tables")
-                    .add(table)
-                    .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                        @Override
-                        public void onSuccess(DocumentReference documentReference) {
-                            Toast.makeText(getContext(), documentReference.getId(), Toast.LENGTH_SHORT).show();
-                        }
-                    })
-                    .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            Toast.makeText(getContext(), e.toString(), Toast.LENGTH_SHORT).show();
-                        }
-                    });
+
+    @Override
+    public void onStop() {
+        EventBus.getDefault().unregister(this);
+        super.onStop();
+    }
+
+    @Subscribe(sticky = true,threadMode = ThreadMode.MAIN)
+    public void onMessageEvent(MessageEvent event) {
+        if(event.getChangeTables() != null){
+            tableAdapter.updateTable(event.getChangeTables());
+
+        }else {
+            NotificationModel model = event.getNotificationModel();
+            NotificationModel.Message messageObject = model.parseMessage();
+            tableAdapter.updateTable(messageObject.getUpdateTables());
         }
-
-
-        HashMap<String,Object> table2 = new HashMap<>();
-        for (int i = 11; i < 21; i++) {
-            table.put("id",String.valueOf(i));
-            table.put("description","");
-            table.put("status"," ");
-            table.put("location","02");
-            db.collection("tables")
-                    .add(table)
-                    .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                        @Override
-                        public void onSuccess(DocumentReference documentReference) {
-                            Toast.makeText(getContext(), documentReference.getId(), Toast.LENGTH_SHORT).show();
-                        }
-                    })
-                    .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            Toast.makeText(getContext(), e.toString(), Toast.LENGTH_SHORT).show();
-                        }
-                    });
+        if(EventBus.getDefault().removeStickyEvent(event)){
+            event.setChangeTables(new ArrayList<>());
         }
-
     }
+
 }

@@ -1,37 +1,57 @@
 package com.example.nhahang.Models;
 
-public class VirtualTable {
+import java.util.Date;
+
+public class DishModel {
     private String documentId;
     private String quantity;
     private String note;
     private boolean discountUnit;
     private String valueDiscount = "";
+    private String price;
     private String totalPriceProduct;
+    private Date oder_time;
 
-    public VirtualTable() {
+    public Date getOder_time() {
+        return oder_time;
     }
 
-    public VirtualTable(String documentId) {
+    public void setOder_time(Date oder_time) {
+        this.oder_time = oder_time;
+    }
+
+    public DishModel() {
+    }
+
+    public DishModel(String documentId) {
         this.documentId = documentId;
     }
 
-    public VirtualTable(String documentId, String quantity) {
+    public DishModel(String documentId, String quantity) {
         this.documentId = documentId;
         this.quantity = quantity;
     }
-    public VirtualTable(String documentId, String quantity,String totalPriceProduct) {
+    public DishModel(String documentId, String quantity, String totalPriceProduct) {
         this.documentId = documentId;
         this.quantity = quantity;
         this.totalPriceProduct = totalPriceProduct;
     }
 
-    public VirtualTable(String documentId, String quantity, String note, boolean discountUnit, String valueDiscount, String totalPriceProduct) {
+    public DishModel(String documentId, String quantity, String note, boolean discountUnit, String valueDiscount, String totalPriceProduct) {
         this.documentId = documentId;
         this.quantity = quantity;
         this.note = note;
         this.discountUnit = discountUnit;
         this.valueDiscount = valueDiscount;
         this.totalPriceProduct = totalPriceProduct;
+    }
+
+    public String getPrice() {
+        return price;
+    }
+
+    public void setPrice(String price) {
+        this.price = price;
     }
 
     public String getNote() {

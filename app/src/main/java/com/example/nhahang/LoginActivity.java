@@ -1,31 +1,37 @@
 package com.example.nhahang;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import androidx.lifecycle.LifecycleOwner;
-import androidx.lifecycle.ViewModel;
+
+
 import androidx.lifecycle.ViewModelProvider;
 
+import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.text.Editable;
+
 import android.text.TextWatcher;
-import android.util.Log;
+
+
 import android.view.View;
 import android.widget.Toast;
+import android.window.OnBackInvokedDispatcher;
 
 import com.example.nhahang.Interfaces.ApiService;
 import com.example.nhahang.Models.Requests.PhoneNumberRequest;
 import com.example.nhahang.Models.Requests.LoginRequest;
 import com.example.nhahang.Models.Respones.LoginResponse;
 import com.example.nhahang.Models.Respones.ServerResponse;
+import com.example.nhahang.Utils.MySharedPreferences;
 import com.example.nhahang.Utils.Util;
 import com.example.nhahang.ViewModels.AttributeWatcherViewModel;
 import com.example.nhahang.databinding.ActivityLoginBinding;
-import com.google.firebase.firestore.FirebaseFirestore;
+
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -39,6 +45,7 @@ public class LoginActivity extends AppCompatActivity {
 
 
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,9 +54,50 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(view);
 
 
+
         binding.progressBar.setVisibility(View.GONE);
 
         binding.ccp.registerCarrierNumberEditText(binding.phoneEt);
+
+
+        try {
+            binding.phoneEt.setText(MySharedPreferences.getPhone(this).replace("+84",""));
+
+        }catch (Exception ignored){}
+
+        binding.passwordEt.setOnTouchListener(Util.ShowOrHidePass(binding.passwordEt));
+
+        binding.forgetPasswordTv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(!binding.ccp.isValidFullNumber()){
+                    binding.phoneEt.setError("Số điện thoại không đúng");
+                    return;
+                }
+                ApiService.apiService.checkPhoneNumberRequest(new PhoneNumberRequest(binding.ccp.getFullNumberWithPlus()))
+                        .enqueue(new Callback<ServerResponse>() {
+                            @Override
+                            public void onResponse(Call<ServerResponse> call, Response<ServerResponse> response) {
+                                if(response.isSuccessful()){
+                                    Intent intent = new Intent(LoginActivity.this,VerifyOtpActivity.class);
+                                    intent.putExtra("phone",binding.ccp.getFullNumberWithPlus());
+                                    intent.putExtra("command","forgetPassword");
+                                    startActivity(intent);
+                                    return;
+                                }
+                                if (response.code() == 401) {
+                                    binding.phoneEt.setError("Số điện thoại không tồn tại");
+                                }
+                            }
+
+                            @Override
+                            public void onFailure(Call<ServerResponse> call, Throwable t) {
+
+                            }
+                        });
+
+            }
+        });
 
 
         View.OnClickListener onClickListener = new View.OnClickListener() {
@@ -127,6 +175,8 @@ public class LoginActivity extends AppCompatActivity {
         });
 
 
+
+
         binding.loginBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -134,11 +184,11 @@ public class LoginActivity extends AppCompatActivity {
                     binding.phoneEt.setError("Số điện thoại không đúng");
                     return;
                 }
-
+                inProgress(true);
                 String phone = binding.ccp.getFullNumberWithPlus();
                 String password = binding.passwordEt.getText().toString().trim();
                 LoginRequest loginRequest = new LoginRequest(phone,password);
-                inProgress(true);
+
                 ApiService.apiService.login(loginRequest).enqueue(new Callback<LoginResponse>() {
                     @Override
                     public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
@@ -163,6 +213,9 @@ public class LoginActivity extends AppCompatActivity {
                                     break;
                                 case 401:
                                     Toast.makeText(LoginActivity.this, "Số điện thoại hoặc mật khẩu không đúng", Toast.LENGTH_SHORT).show();
+                                    break;
+                                case 402:
+                                    Toast.makeText(LoginActivity.this, "Tài khoản không tồn tại", Toast.LENGTH_SHORT).show();
                                     break;
                             }
                             inProgress(false);
@@ -246,6 +299,7 @@ public class LoginActivity extends AppCompatActivity {
 
         return isExists[0];
     }
+
 
     @Override
     protected void onDestroy() {

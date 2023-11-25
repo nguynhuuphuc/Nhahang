@@ -25,12 +25,6 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Bàn số: "
-                android:textSize="18sp"
-                android:textColor="@color/white"/>
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
                 android:text="1"
                 android:id="@+id/nameTableTv"
                 android:textSize="18sp"
@@ -146,7 +140,6 @@
 
                 </RelativeLayout>
             </androidx.cardview.widget.CardView>
-
 
         </LinearLayout>
 

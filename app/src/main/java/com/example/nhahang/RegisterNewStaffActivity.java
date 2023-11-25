@@ -1,5 +1,7 @@
 package com.example.nhahang;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
@@ -41,7 +43,8 @@ public class RegisterNewStaffActivity extends AppCompatActivity {
     private ActivityRegisterNewStaffBinding binding;
     String phoneNumber;
     Calendar mCalendar = Calendar.getInstance();
-    private FirebaseDatabase dbRealtime = FirebaseDatabase.getInstance();
+    private ActivityResultLauncher<Intent> launcher;
+
 
 
     @Override
@@ -50,18 +53,20 @@ public class RegisterNewStaffActivity extends AppCompatActivity {
         binding = ActivityRegisterNewStaffBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        launcher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
+            @Override
+            public void onActivityResult(ActivityResult o) {
+                if(o.getResultCode() == RESULT_OK){
+                    Intent data = o.getData();
+                    setResult(RESULT_OK,data);
+                    finish();
+
+                }
+            }
+        });
 
         CheckVerifyViewModel viewModel = new ViewModelProvider(this).get(CheckVerifyViewModel.class);
-        // Đăng ký để theo dõi sự thay đổi của isVerify
-        viewModel.getIsVerify().observe(this, isVerified -> {
-            if (isVerified) {
-                viewModel.setIsVerify(false);
-                // Thực hiện các hành động tương ứng khi isVerify thay đổi thành true
-                dbRealtime.getReference("staffManagementChange").setValue(true);
-                finish();
-            }
 
-        });
 
         binding.toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
@@ -213,7 +218,7 @@ public class RegisterNewStaffActivity extends AppCompatActivity {
         intent.putExtra("phone",binding.ccp.getFullNumberWithPlus());
         intent.putExtra("command","register");
         intent.putExtra("employee",employee);
-        startActivity(intent);
+        launcher.launch(intent);
     }
 
     private boolean isValid(){

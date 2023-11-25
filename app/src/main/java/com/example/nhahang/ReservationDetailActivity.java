@@ -2,12 +2,15 @@ package com.example.nhahang;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -45,6 +48,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 
 public class ReservationDetailActivity extends AppCompatActivity {
     private ActivityReservationDetailBinding binding;
@@ -65,9 +69,15 @@ public class ReservationDetailActivity extends AppCompatActivity {
         binding = ActivityReservationDetailBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         setSupportActionBar(binding.toolBar);
-        getSupportActionBar().setDisplayShowTitleEnabled(false);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayShowTitleEnabled(false);
+
         setFormatMoney();
         buildDialog();
+
+        Drawable navIcon = ContextCompat.getDrawable(this, R.drawable.close_icon);
+
+        navIcon.setColorFilter(getResources().getColor(R.color.white), PorterDuff.Mode.SRC_IN);
+        binding.toolBar.setNavigationIcon(navIcon);
 
         binding.toolBar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
@@ -77,12 +87,11 @@ public class ReservationDetailActivity extends AppCompatActivity {
                     if(!oldPrice.equals("") && !oldPrice.equals(newPrice)){
                         dialog.show();
                     }else{
-                        onBackPressed();
                         supportFinishAfterTransition();
                     }
                 }catch (Exception e){
-                    onBackPressed();
                     supportFinishAfterTransition();
+
                 }
 
             }
@@ -145,7 +154,7 @@ public class ReservationDetailActivity extends AppCompatActivity {
             public void onClick(View v) {
 
                 binding.thongBao.setBackgroundResource(R.drawable.radius_light_blue_background);
-                onBackPressed();
+
                 supportFinishAfterTransition();
             }
         });

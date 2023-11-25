@@ -29,7 +29,7 @@
                 android:id="@+id/logoIv"
                 android:layout_width="wrap_content"
                 android:layout_height="200dp"
-                android:src="@drawable/logo" />
+                android:src="@drawable/hp_res_logo" />
 
             <TextView
                 android:id="@+id/verifyPhoneNumberTv"
@@ -82,7 +82,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:background="@drawable/btn_rounded_corner"
-                        android:text="Xác nhập" />
+                        android:text="Xác nhận" />
                     <ProgressBar
                         android:id="@+id/progressBar"
                         android:layout_width="32dp"
@@ -127,6 +127,7 @@
                         android:background="@drawable/edit_text_rounded_corner"
                         android:elevation="5dp"
                         android:hint="Nhập mật khẩu"
+                        android:drawableEnd="@drawable/ic_visibility_off"
                         android:inputType="textPassword"
                         android:padding="10dp" />
 
@@ -144,6 +145,7 @@
                         android:layout_margin="10dp"
                         android:background="@drawable/edit_text_rounded_corner"
                         android:elevation="5dp"
+                        android:drawableEnd="@drawable/ic_visibility_off"
                         android:hint="Nhập mật lại khẩu"
                         android:inputType="textPassword"
                         android:padding="10dp" />
@@ -156,7 +158,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="@drawable/btn_rounded_corner"
-                    android:text="Xác nhập" />
+                    android:text="Xác nhận và đăng nhập" />
 
             </LinearLayout>
         </LinearLayout>

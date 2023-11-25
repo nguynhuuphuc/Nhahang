@@ -9,6 +9,13 @@
         <item
             android:title="Quản lý nhân viên"
             android:id="@+id/nav_quanLyNV"/>
+        <item
+            android:title="Đơn thanh toán"
+            android:id="@+id/nav_paidOrders"/>
+
+        <item
+            android:id="@+id/nav_revenueStatistics"
+            android:title="Doanh thu"/>
 
     </group>
 </menu>

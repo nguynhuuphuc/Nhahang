@@ -150,6 +150,7 @@
             android:orientation="vertical"
             android:background="@color/white">
             <androidx.cardview.widget.CardView
+                android:id="@+id/paymentMethodCv"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="10dp"
@@ -160,10 +161,10 @@
                     android:padding="5dp"
                     android:background="@drawable/border_black_line_background">
                     <ImageView
-                        android:id="@+id/icon_cash"
+                        android:id="@+id/icon_payment"
                         android:layout_width="40dp"
                         android:layout_height="30dp"
-                        android:src="@drawable/money_icon"/>
+                        android:src="@drawable/paid_ic"/>
                     <TextView
                         android:id="@+id/name_payment"
                         android:layout_width="wrap_content"
@@ -171,7 +172,7 @@
                         android:text="Tiền mặt"
                         android:textColor="@color/black"
                         android:layout_centerVertical="true"
-                        android:layout_toEndOf="@id/icon_cash"/>
+                        android:layout_toEndOf="@id/icon_payment"/>
                     <ImageView
                         android:layout_width="15dp"
                         android:layout_height="15dp"
@@ -183,27 +184,41 @@
 
             </androidx.cardview.widget.CardView>
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Tiền khách trả"
-                android:layout_marginStart="10dp"
-                android:textColor="@color/black"/>
-            <EditText
-                android:id="@+id/customerPayEt"
+            <LinearLayout
+                android:id="@+id/cashAndExchangeLl"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="@color/black"
-                android:textSize="16dp"
-                android:layout_margin="10dp"
-                android:imeOptions="actionDone"
-                android:textStyle="bold"
-                android:text="0"
-                android:inputType="number"
-                android:gravity="right"/>
+                android:orientation="vertical">
+                <LinearLayout
+                    android:id="@+id/customerPayLl"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Tiền khách trả"
+                        android:layout_marginStart="10dp"
+                        android:textColor="@color/black"/>
+                    <EditText
+                        android:id="@+id/customerPayEt"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/black"
+                        android:textSize="16dp"
+                        android:layout_margin="10dp"
+                        android:imeOptions="actionDone"
+                        android:textStyle="bold"
+                        android:text="0"
+                        android:inputType="number"
+                        android:gravity="right"/>
+                </LinearLayout>
+            </LinearLayout>
+
         </LinearLayout>
 
         <RelativeLayout
+            android:id="@+id/moneyChangeRl"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="30dp"
@@ -212,9 +227,12 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="5dp"
+                android:layout_marginStart="5dp"
+                android:layout_marginTop="5dp"
+                android:layout_marginEnd="5dp"
+                android:layout_marginBottom="5dp"
                 android:text="Tiền thừa trả khách"
-                android:textColor="@color/black"/>
+                android:textColor="@color/black" />
             <TextView
                 android:id="@+id/moneyChangeTv"
                 android:layout_width="wrap_content"

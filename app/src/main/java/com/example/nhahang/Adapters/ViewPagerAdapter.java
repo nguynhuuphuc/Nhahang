@@ -12,10 +12,13 @@ import com.example.nhahang.Fragments.HomeFragment;
 import com.example.nhahang.Fragments.MenuFragment;
 import com.example.nhahang.Fragments.ReservationFragment;
 import com.example.nhahang.Fragments.UserFragment;
+import com.example.nhahang.Interfaces.IUpdateTablesListener;
 
 public class ViewPagerAdapter extends FragmentStateAdapter {
+
     public ViewPagerAdapter(@NonNull FragmentActivity fragmentActivity) {
         super(fragmentActivity);
+
     }
     @NonNull
     @Override

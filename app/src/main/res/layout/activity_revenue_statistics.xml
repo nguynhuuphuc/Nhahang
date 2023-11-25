@@ -1,0 +1,434 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".RevenueStatisticsActivity"
+    android:background="@color/ghost_white">
+    <androidx.appcompat.widget.Toolbar
+        android:layout_alignParentTop="true"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/toolbar"
+        app:title="Thống kê doanh thu"
+        app:navigationIcon="@drawable/close_icon"/>
+
+    <ScrollView
+        android:layout_below="@id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/todayRevenueLabel"
+                android:layout_marginTop="15dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Thống kê doanh thu hôm nay"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:layout_below="@id/todayRevenueLabel"
+                android:id="@+id/todayRevenueLl"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/white"
+                android:orientation="horizontal"
+                android:weightSum="2">
+
+                <androidx.cardview.widget.CardView
+                    android:layout_width="0dp"
+                    android:layout_margin="10dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    app:cardCornerRadius="8dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginBottom="10dp"
+                        android:orientation="vertical"
+                        android:gravity="center">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Doanh thu thực"/>
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center"
+                            android:id="@+id/todayTotalAmountTv"
+                            android:text="2,361,600 VND"
+                            android:textSize="18sp"
+                            android:textColor="@color/bright_orange"/>
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:padding="10dp"
+                            android:orientation="vertical">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Tổng đơn"/>
+
+                            <TextView
+                                android:id="@+id/todayQuantityTv"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textColor="@color/black"
+                                android:textSize="18sp"
+                                android:text="100"
+                                android:layout_gravity="center"/>
+                        </LinearLayout>
+
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+
+                <androidx.cardview.widget.CardView
+                    android:layout_width="0dp"
+                    app:cardCornerRadius="8dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_margin="10dp">
+                    <LinearLayout
+                        android:layout_marginTop="10dp"
+                        android:layout_marginBottom="10dp"
+
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:gravity="center">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Doanh thu dự tính"/>
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center"
+                            android:id="@+id/todayWillTotalAmountTv"
+                            android:text="2,361,600 VND"
+                            android:textSize="18sp"
+                            android:textColor="@color/bright_orange"/>
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:padding="10dp"
+                            android:orientation="vertical">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Tổng đơn"/>
+
+                            <TextView
+                                android:id="@+id/todayWillQuantityTv"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textColor="@color/black"
+                                android:textSize="18sp"
+                                android:text="100"
+                                android:layout_gravity="center"/>
+                        </LinearLayout>
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+            </LinearLayout>
+            <LinearLayout
+                android:layout_marginTop="15dp"
+                android:id="@+id/weekLl"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/todayRevenueLl"
+                android:orientation="vertical"
+                android:background="@color/white"
+                android:padding="5dp"
+                android:gravity="left|center_vertical">
+                <Spinner
+                    android:id="@+id/dateRangeSpinner"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+                
+                <LinearLayout
+                    android:id="@+id/rangeDateSelectLl"
+                    android:layout_marginTop="10dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="5"
+                    android:orientation="horizontal"
+                    android:gravity="center">
+                    <EditText
+                        android:id="@+id/editTextStartDate"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="2"
+                        android:hint="Bắt đầu"
+                        android:focusable="false"
+                        android:enabled="false"
+                        android:clickable="true"
+                        />
+                    <EditText
+                        android:enabled="false"
+                        android:id="@+id/editTextEndDate"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="2"
+                        android:hint="Kết thúc"
+                        android:focusable="false"
+                        android:clickable="true" />
+
+                    <androidx.cardview.widget.CardView
+                        android:id="@+id/selectRangeDateBtn"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        app:cardCornerRadius="8dp"
+                        app:cardBackgroundColor="@color/deep_sky_blue">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Chọn"
+                            android:textStyle="bold"
+                            android:textColor="@color/white"
+                            android:layout_gravity="center"/>
+                    </androidx.cardview.widget.CardView>
+
+
+                </LinearLayout>
+
+
+            </LinearLayout>
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/dayOfWeekCv"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/weekLl"
+                app:cardCornerRadius="0dp">
+                <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:weightSum="5"
+                android:gravity="center_vertical">
+
+                <ImageView
+                    android:id="@+id/backWeekArrow"
+                    android:padding="2dp"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:src="@drawable/arrow_back_ios_icon"/>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="3"
+                        android:orientation="vertical">
+                        <TextView
+                            android:id="@+id/intervalTv"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Doanh Thu 18 - 24 tháng 5"
+                            android:gravity="center"/>
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center"
+                            android:id="@+id/weekTotalAmountTv"
+                            android:text="2,361,600 VND"
+                            android:textSize="22sp"
+                            android:textColor="@color/bright_orange"/>
+
+                        <androidx.cardview.widget.CardView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            app:cardCornerRadius="8dp"
+                            android:layout_marginBottom="5dp">
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:padding="10dp"
+                                android:orientation="vertical">
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Tổng đơn"/>
+
+                                <TextView
+                                    android:id="@+id/weekQuantityTv"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:textColor="@color/black"
+                                    android:textSize="18sp"
+                                    android:text="100"
+                                    android:layout_gravity="center"/>
+                            </LinearLayout>
+
+                        </androidx.cardview.widget.CardView>
+                    </LinearLayout>
+
+                <ImageView
+                    android:id="@+id/forwardWeekArrow"
+                    android:padding="2dp"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:src="@drawable/arrow_forward_ios_icon"/>
+
+            </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <com.github.mikephil.charting.charts.BarChart
+                android:id="@+id/barChart"
+                android:background="@color/white"
+                android:layout_below="@id/dayOfWeekCv"
+                android:layout_width="match_parent"
+                android:layout_height="450dp"/>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignTop="@id/barChart"
+                android:layout_alignBottom="@id/barChart">
+
+                <ProgressBar
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:id="@+id/progressBarChart"/>
+
+            </RelativeLayout>
+
+            <LinearLayout
+                android:layout_marginTop="20dp"
+                android:background="@color/white"
+                android:id="@+id/spinnerLl"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/barChart"
+                android:orientation="horizontal"
+                android:gravity="right|center_vertical">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Thống kê theo: "
+                    android:textSize="16sp"
+                    android:textColor="@color/black"
+                    android:gravity="center_vertical"/>
+                <Spinner
+                    android:id="@+id/intervalSpinner"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+
+            <com.github.mikephil.charting.charts.BarChart
+                android:id="@+id/barChart2"
+                android:layout_below="@id/spinnerLl"
+                android:layout_width="match_parent"
+                android:layout_height="450dp"
+                android:background="@color/white"/>
+
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignTop="@id/barChart2"
+                android:layout_alignBottom="@id/barChart2">
+                <ProgressBar
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:id="@+id/progressBarChart2"/>
+            </RelativeLayout>
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/detailCardView"
+                android:layout_alignTop="@id/barChart2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                app:cardElevation="10dp"
+                android:visibility="invisible">
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="5dp">
+                    <ImageView
+                        android:id="@+id/carview_closeIv"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/close_icon"
+                        android:layout_alignParentEnd="true"
+                        android:layout_alignParentTop="true"
+                        app:tint="@color/gray" />
+                    <TextView
+                        android:id="@+id/cardview_dayTv"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Doanh thu 31-5"
+                        android:layout_centerHorizontal="true"/>
+                    <TextView
+                        android:id="@+id/cardview_totalAmountTv"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@id/cardview_dayTv"
+                        android:layout_centerHorizontal="true"
+                        android:textSize="22sp"
+                        android:text="939,000đ"
+                        android:textColor="@color/bright_orange"/>
+                    <LinearLayout
+                        android:layout_below="@id/cardview_totalAmountTv"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center">
+
+                        <androidx.cardview.widget.CardView
+                            android:layout_width="wrap_content"
+                            android:layout_margin="10dp"
+                            android:layout_height="wrap_content"
+                            app:cardCornerRadius="8dp"
+                            app:cardElevation="4dp">
+                            <LinearLayout
+                                android:paddingStart="50dp"
+                                android:paddingEnd="50dp"
+                                android:padding="5dp"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical"
+                                android:gravity="center">
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Tổng đơn"/>
+
+                                <TextView
+                                    android:id="@+id/cardview_quantityTv"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:textColor="@color/black"
+                                    android:text="24"
+                                    android:textSize="16sp"/>
+                            </LinearLayout>
+                        </androidx.cardview.widget.CardView>
+
+                    </LinearLayout>
+
+                </RelativeLayout>
+            </androidx.cardview.widget.CardView>
+
+    </RelativeLayout>
+    </ScrollView>
+</RelativeLayout>

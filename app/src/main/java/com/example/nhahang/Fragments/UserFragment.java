@@ -37,6 +37,7 @@ import com.example.nhahang.Models.Requests.UserUidRequest;
 import com.example.nhahang.R;
 
 import com.example.nhahang.Utils.Auth;
+import com.example.nhahang.Utils.MySharedPreferences;
 import com.example.nhahang.Utils.Util;
 import com.example.nhahang.databinding.FragmentUserBinding;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -171,6 +172,7 @@ public class UserFragment extends Fragment {
                 inProgress(true);
                 enableEdit(false);
                 if (imageUri != null) {
+                    Toast.makeText(getContext(), imageUri.toString(), Toast.LENGTH_SHORT).show();
                     StorageReference imgReference = storageRef.child("user/employees/" + Auth.User_Uid + "." + getFileExtension(imageUri));
                     imgReference.putFile(imageUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                         @Override
@@ -179,18 +181,18 @@ public class UserFragment extends Fragment {
                                 @Override
                                 public void onSuccess(Uri uri) {
                                     employee.setAvatar(uri.toString());
-                                    ApiService.apiService.updateEmployee(employee).enqueue(new Callback<ServerResponse>() {
+                                    ApiService.apiService.updateEmployee(employee).enqueue(new Callback<Employee>() {
                                         @Override
-                                        public void onResponse(Call<ServerResponse> call, Response<ServerResponse> response) {
+                                        public void onResponse(Call<Employee> call, Response<Employee> response) {
                                             if(response.isSuccessful()) {
-                                                ServerResponse serverResponse = response.body();
-                                                Toast.makeText(getContext(), serverResponse.getMessage(), Toast.LENGTH_SHORT).show();
+                                                Employee serverResponse = response.body();
+                                                Toast.makeText(getContext(), "Cập nhật thành công!", Toast.LENGTH_SHORT).show();
                                                 AuthSigined();
                                             }
                                         }
 
                                         @Override
-                                        public void onFailure(Call<ServerResponse> call, Throwable t) {
+                                        public void onFailure(Call<Employee> call, Throwable t) {
                                             Toast.makeText(getContext(), "Cập nhật thất bại", Toast.LENGTH_SHORT).show();
                                         }
                                     });
@@ -203,18 +205,18 @@ public class UserFragment extends Fragment {
                 else
                 {
 
-                    ApiService.apiService.updateEmployee(employee).enqueue(new Callback<ServerResponse>() {
+                    ApiService.apiService.updateEmployee(employee).enqueue(new Callback<Employee>() {
                         @Override
-                        public void onResponse(Call<ServerResponse> call, Response<ServerResponse> response) {
+                        public void onResponse(Call<Employee> call, Response<Employee> response) {
                             if(response.isSuccessful()) {
-                                ServerResponse serverResponse = response.body();
-                                Toast.makeText(getContext(), serverResponse.getMessage(), Toast.LENGTH_SHORT).show();
+                                Employee serverResponse = response.body();
+                                Toast.makeText(getContext(), "Cập nhật thành công!", Toast.LENGTH_SHORT).show();
                                 AuthSigined();
                             }
 
                         }
                         @Override
-                        public void onFailure(Call<ServerResponse> call, Throwable t) {
+                        public void onFailure(Call<Employee> call, Throwable t) {
                             Toast.makeText(getContext(), "Cập nhật thất bại", Toast.LENGTH_SHORT).show();
                         }
                     });
@@ -246,8 +248,11 @@ public class UserFragment extends Fragment {
         binding.logout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                auth.signOut();
+                if(auth != null){
+                    auth.signOut();
+                }
                 Auth.SetNull();
+                MySharedPreferences.saveUserUid(getContext(),null);
                 startActivity(new Intent(getContext(), LoginActivity.class));
                 getActivity().finish();
             }

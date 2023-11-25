@@ -5,7 +5,7 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 public class CheckVerifyViewModel extends ViewModel {
-    private static MutableLiveData<Boolean> isVerify = new MutableLiveData<>();
+    private static final MutableLiveData<Boolean> isVerify = new MutableLiveData<>();
 
     public LiveData<Boolean> getIsVerify() {
         return isVerify;

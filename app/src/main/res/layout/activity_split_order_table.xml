@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".SplitOrderTableActivity">
+
+    <androidx.appcompat.widget.Toolbar
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/toolbar"
+        app:navigationIcon="@drawable/close_icon">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Tách đơn"
+            android:textSize="18sp"
+            android:textColor="@color/black"
+            android:layout_gravity="center"/>
+    </androidx.appcompat.widget.Toolbar>
+
+    <RelativeLayout
+        android:id="@+id/contentRl"
+        android:layout_above="@id/doneCv"
+        android:layout_marginBottom="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/toolbar">
+        <TextView
+            android:layout_marginStart="15dp"
+            android:id="@+id/splitLabel"
+            android:gravity="center_vertical"
+            android:layout_alignTop="@id/selectOrderTableTil"
+            android:layout_alignBottom="@id/selectOrderTableTil"
+            android:layout_alignParentStart="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Tách đến"
+            android:textSize="16sp"
+            android:textColor="@color/black"/>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/selectOrderTableTil"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@id/splitLabel"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="15dp"
+            android:layout_alignParentEnd="true"
+            style="@style/CustomOutlinedBoxExposedDropdownMenu">
+
+            <AutoCompleteTextView
+                android:id="@+id/autoCompleteTv"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:dropDownHeight="300dp"
+                android:inputType="none"
+                tools:ignore="SpeakableTextPresentCheck" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/selectNewOrderTableTil"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@id/splitLabel"
+            android:layout_below="@id/selectOrderTableTil"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="15dp"
+            android:hint="Chọn bàn muốn tách"
+            android:layout_alignParentEnd="true"
+            style="@style/CustomOutlinedBoxExposedDropdownMenu">
+            <AutoCompleteTextView
+                android:id="@+id/autoCompleteTv2"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:inputType="none"
+                android:dropDownHeight="300dp"/>
+        </com.google.android.material.textfield.TextInputLayout>
+        <LinearLayout
+            android:layout_marginTop="10dp"
+            android:background="@color/ghost_white"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/selectNewOrderTableTil"
+            android:padding="5dp"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:weightSum="7">
+                <TextView
+                    android:layout_width="0dp"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:layout_marginStart="2dp"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/black"
+                    android:layout_weight="3"
+                    android:text="Món ăn"/>
+
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/black"
+                    android:layout_weight="2"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:gravity="center"
+                    android:text="SL gốc"/>
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/black"
+                    android:layout_weight="2"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:gravity="center"
+                    android:text="SL tách"/>
+            </LinearLayout>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/itemsSplitRv" />
+
+        </LinearLayout>
+
+
+    </RelativeLayout>
+
+    <ProgressBar
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/progressBar"
+        android:layout_centerInParent="true"/>
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/doneCv"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="10dp"
+        app:cardCornerRadius="8dp">
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Thực hiện"
+            android:gravity="center"
+            android:padding="15dp"
+            android:textColor="@color/white"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:background="@color/deep_sky_blue"/>
+    </androidx.cardview.widget.CardView>
+
+
+</RelativeLayout>
