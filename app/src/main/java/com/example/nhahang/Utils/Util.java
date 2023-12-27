@@ -18,6 +18,7 @@ import androidx.lifecycle.ViewModelStoreOwner;
 
 import com.example.nhahang.Interfaces.ApiService;
 import com.example.nhahang.Models.Requests.PhoneNumberRequest;
+import com.example.nhahang.Models.ReservationModel;
 import com.example.nhahang.Models.Respones.ServerResponse;
 import com.example.nhahang.Models.TableModel;
 import com.example.nhahang.R;
@@ -27,6 +28,7 @@ import com.google.type.DateTime;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.ParseException;
+import java.time.DayOfWeek;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -35,8 +37,10 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.text.SimpleDateFormat;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
 import retrofit2.Call;
@@ -44,11 +48,9 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class Util {
-    public static final String localhost = "192.168.1.152";
+    public static final String localhost = "192.168.1.205";
     public static final String WEBSOCKET_URL = "ws://" + localhost+":3000";
-    public static final int INSERT = 1;
-    public static final int UPDATE = 2;
-    public static final int DELETE = 3;
+
         public static final String CRUD = "CRUD";
 
     public static boolean formIsValid;
@@ -143,6 +145,26 @@ public class Util {
             }
         });
     }
+    public static String getDayOfWeek(LocalDate date){
+        DayOfWeek dayOfWeek = date.getDayOfWeek();
+        switch (dayOfWeek.getValue()){
+            case 1:
+                return "T2";
+            case 2:
+                return "T3";
+            case 3:
+                return "T4";
+            case 4:
+                return "T5";
+            case 5:
+                return "T6";
+            case 6:
+                return "T7";
+            case 7:
+                return "CN";
+        }
+        return "";
+    }
 
     public static View.OnTouchListener ShowOrHidePass(final EditText editText){
         return new View.OnTouchListener() {
@@ -169,6 +191,31 @@ public class Util {
             }
         };
     }
+
+    public static String dateTimeInMessageFormatting(Date date){
+        // Lấy ngày và giờ hiện tại
+        Date currentDate = new Date();
+        Calendar currentCalendar = Calendar.getInstance();
+        currentCalendar.setTime(currentDate);
+
+        // Ngày và giờ cần định dạng
+        Calendar targetCalendar = Calendar.getInstance();
+        targetCalendar.setTime(date);
+
+        // Tạo đối tượng SimpleDateFormat để định dạng kiểu ngày và giờ
+        SimpleDateFormat dateFormat;
+        if (currentCalendar.get(Calendar.YEAR) == targetCalendar.get(Calendar.YEAR)
+                && currentCalendar.get(Calendar.MONTH) == targetCalendar.get(Calendar.MONTH)
+                && currentCalendar.get(Calendar.DAY_OF_MONTH) == targetCalendar.get(Calendar.DAY_OF_MONTH)) {
+            // Nếu là ngày hiện tại, chỉ hiển thị giờ và phút
+            dateFormat = new SimpleDateFormat("h:mm a");
+        } else {
+            // Ngày không trùng khớp, hiển thị ngày và giờ
+            dateFormat = new SimpleDateFormat("yy/MM/dd h:mm a");
+        }
+        return dateFormat.format(date);
+    }
+
 
     public static String convertToTodayYesterday(Date date) {
         Date currentDate = new Date();
@@ -251,16 +298,59 @@ public class Util {
             changeTables.addAll(values);
             return;
         }
-        for(TableModel value : values){
-            for(TableModel model : changeTables){
-                if(model.getTable_id() == value.getTable_id()){
-                    changeTables.set(changeTables.indexOf(model),value);
-                    values.remove(value);
-                    break;
+        Map<Integer, TableModel> map = new HashMap<>();
+
+        // Tạo một map từ array1 để dễ dàng kiểm tra sự tồn tại
+        for (TableModel obj : changeTables) {
+            map.put(obj.getTable_id(), obj);
+        }
+
+        // Duyệt qua array2 và ghi đè hoặc thêm mới vào array1
+        for (TableModel obj : values) {
+            if (map.containsKey(obj.getTable_id())) {
+                // Ghi đè nếu tồn tại
+                TableModel existingObject = map.get(obj.getTable_id());
+                for(TableModel model : changeTables){
+                    if(model.getTable_id() == existingObject.getTable_id()){
+                        changeTables.set(changeTables.indexOf(model),obj);
+                        break;
+                    }
                 }
+            } else {
+                // Thêm mới nếu không tồn tại
+                changeTables.add(obj);
             }
         }
-        if(values.isEmpty()) return;
-        changeTables.addAll(values);
     }
+    public static void changeReservationAdding(List<ReservationModel> changeReservations, List<ReservationModel> values){
+        if(changeReservations == null ) changeReservations = new ArrayList<>();
+        if(changeReservations.isEmpty()){
+            changeReservations.addAll(values);
+            return;
+        }
+        Map<Integer, ReservationModel> map = new HashMap<>();
+
+        // Tạo một map từ array1 để dễ dàng kiểm tra sự tồn tại
+        for (ReservationModel obj : changeReservations) {
+            map.put(obj.getId(), obj);
+        }
+
+        // Duyệt qua array2 và ghi đè hoặc thêm mới vào array1
+        for (ReservationModel obj : values) {
+            if (map.containsKey(obj.getId())) {
+                // Ghi đè nếu tồn tại
+                ReservationModel existingObject = map.get(obj.getId());
+                for(ReservationModel model : changeReservations){
+                    if(model.getId() == existingObject.getId()){
+                        changeReservations.set(changeReservations.indexOf(model),existingObject);
+                        break;
+                    }
+                }
+            } else {
+                // Thêm mới nếu không tồn tại
+                changeReservations.add(obj);
+            }
+        }
+    }
+
 }

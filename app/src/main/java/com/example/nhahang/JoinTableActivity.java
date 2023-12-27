@@ -230,7 +230,6 @@ public class JoinTableActivity extends AppCompatActivity implements SwipeRefresh
     }
 
     private void notifyJoinTableSuccess(TableModel tableModel) {
-
         JSONObject object = new JSONObject();
         try {
             object.put("from",Auth.User_Uid);
@@ -240,6 +239,7 @@ public class JoinTableActivity extends AppCompatActivity implements SwipeRefresh
             message.put("old_table_id",currentTableModel.getTable_id());
             message.put("new_table_id",tableModel.getTable_id());
             object.put("message",message);
+            object.put("action","JOIN_TABLE");
             mApp.getWebSocketClient().send(object.toString());
         } catch (JSONException e) {
             e.printStackTrace();

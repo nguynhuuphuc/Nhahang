@@ -1,8 +1,11 @@
 package com.example.nhahang;
 
 import android.app.Application;
+import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.media.AudioAttributes;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
@@ -29,6 +32,8 @@ import java.util.List;
 
 public class MyApplication extends Application{
     public static final String CHANNEL_ID = "CHANNEL 1";
+    public static final String CHANNEL_ID_2 = "CHANNEL 2";
+    public static final String CHANNEL_MESSAGE = "CHANNEL MESSAGE";
     private MyWebSocketClient webSocketClient;
     private List<MenuModel> menuModels;
     private List<Employee> employees;
@@ -42,6 +47,7 @@ public class MyApplication extends Application{
         // Khởi tạo FirebaseApp
         FirebaseApp.initializeApp(this);
         createNotificationChannel();
+        createNotificationChannel2();
     }
 
     public IUpdateTablesListener getiUpdateTablesListener() {
@@ -52,14 +58,64 @@ public class MyApplication extends Application{
         this.iUpdateTablesListener = iUpdateTablesListener;
     }
 
-    private void createNotificationChannel() {
+    private void createNotificationChannel2() {
         // Create the NotificationChannel, but only on API 26+ because
         // the NotificationChannel class is not in the Support Library.
+        CharSequence name = getString(R.string.channel_name2);
+        String description = getString(R.string.channel_description);
+        int importance = NotificationManager.IMPORTANCE_HIGH;
+        NotificationChannel channel = new NotificationChannel(CHANNEL_ID_2, name, importance);
+        channel.setDescription(description);
+        channel.enableVibration(true);
+        channel.setVibrationPattern(new long[]{100,100,200,340});
+        channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
+
+        // Register the channel with the system; you can't change the importance
+        // or other notification behaviors after this.
+        NotificationManager notificationManager = getSystemService(NotificationManager.class);
+        notificationManager.createNotificationChannel(channel);
+
+
+        Uri sound = Uri.parse("android.resource://" + getPackageName() + "/"+ R.raw.sound_notification);
+        // Create the NotificationChannel, but only on API 26+ because
+        // the NotificationChannel class is not in the Support Library.
+
+        AudioAttributes audioAttributes = new AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+                .build();
+        CharSequence name2 = getString(R.string.channel_message);
+        String description2 = getString(R.string.channel_description);
+        int importance2 = NotificationManager.IMPORTANCE_HIGH;
+        NotificationChannel channel2 = new NotificationChannel(CHANNEL_MESSAGE, name2, importance2);
+        channel2.setDescription(description2);
+        channel2.enableVibration(true);
+        channel2.setVibrationPattern(new long[]{100,100,200,340});
+        channel2.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
+        channel2.setSound(sound,audioAttributes);
+
+        // Register the channel with the system; you can't change the importance
+        // or other notification behaviors after this.
+        notificationManager.createNotificationChannel(channel2);
+    }
+
+    private void createNotificationChannel() {
+        Uri sound = Uri.parse("android.resource://" + getPackageName() + "/"+ R.raw.sound_notification);
+        // Create the NotificationChannel, but only on API 26+ because
+        // the NotificationChannel class is not in the Support Library.
+
+        AudioAttributes audioAttributes = new AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+                .build();
         CharSequence name = getString(R.string.channel_name);
         String description = getString(R.string.channel_description);
-        int importance = NotificationManager.IMPORTANCE_DEFAULT;
+        int importance = NotificationManager.IMPORTANCE_HIGH;
         NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
         channel.setDescription(description);
+        channel.enableVibration(true);
+        channel.setVibrationPattern(new long[]{100,100,200,340});
+        channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
+        channel.setSound(sound,audioAttributes);
+
         // Register the channel with the system; you can't change the importance
         // or other notification behaviors after this.
         NotificationManager notificationManager = getSystemService(NotificationManager.class);

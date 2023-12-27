@@ -54,6 +54,61 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(view);
 
 
+        binding.kitchen.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(!binding.ccp.isValidFullNumber()){
+                    binding.phoneEt.setError("Số điện thoại không đúng");
+                    return;
+                }
+                inProgress(true);
+                String phone = binding.ccp.getFullNumberWithPlus();
+                String password = binding.passwordEt.getText().toString().trim();
+                LoginRequest loginRequest = new LoginRequest(phone,password);
+
+                ApiService.apiService.loginKitchen(loginRequest).enqueue(new Callback<LoginResponse>() {
+                    @Override
+                    public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
+                        if (response.isSuccessful()) {
+                            // Request was successful, process the response
+                            LoginResponse r = response.body();
+                            Toast.makeText(LoginActivity.this, "Đăng nhập thành công", Toast.LENGTH_SHORT).show();
+                            Intent intent = new Intent(LoginActivity.this,KitchenMainActivity.class);
+                            assert r != null;
+                            intent.putExtra("user_uid", r.getUser_uid());
+                            intent.putExtra("phoneNumber",binding.ccp.getFullNumberWithPlus());
+
+                            startActivity(intent);
+                            finish();
+                        } else {
+                            // Request failed, handle the error
+                            int statusCode = response.code();
+                            // Check the status code for specific error handling
+                            switch (statusCode){
+                                case 500:
+                                    Toast.makeText(LoginActivity.this, "An error occurred during login.", Toast.LENGTH_SHORT).show();
+                                    break;
+                                case 401:
+                                    Toast.makeText(LoginActivity.this, "Số điện thoại hoặc mật khẩu không đúng", Toast.LENGTH_SHORT).show();
+                                    break;
+                                case 402:
+                                    Toast.makeText(LoginActivity.this, "Tài khoản không tồn tại", Toast.LENGTH_SHORT).show();
+                                    break;
+                            }
+                            inProgress(false);
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<LoginResponse> call, Throwable t) {
+                        Toast.makeText(LoginActivity.this, "Fail", Toast.LENGTH_SHORT).show();
+                        inProgress(false);
+                    }
+                });
+
+            }
+        });
+
 
         binding.progressBar.setVisibility(View.GONE);
 

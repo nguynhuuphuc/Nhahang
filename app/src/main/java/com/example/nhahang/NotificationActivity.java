@@ -5,6 +5,7 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Toast;
@@ -60,10 +61,13 @@ public class NotificationActivity extends AppCompatActivity {
         });
 
         setSupportActionBar(binding.toolbar);
-
+        Intent intentResult = new Intent();
+        intentResult.putExtra("activity",NotificationActivity.class.getSimpleName());
+        setResult(RESULT_OK,intentResult);
         binding.toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
                 getOnBackPressedDispatcher().onBackPressed();
             }
         });
@@ -152,4 +156,10 @@ public class NotificationActivity extends AppCompatActivity {
        });
 
    }
+
+    @Override
+    public void finish() {
+        super.finish();
+        setResult(RESULT_OK);
+    }
 }

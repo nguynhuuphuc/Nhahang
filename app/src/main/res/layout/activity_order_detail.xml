@@ -29,6 +29,7 @@
 
     </androidx.appcompat.widget.Toolbar>
 
+
     <RelativeLayout
         android:id="@+id/contentRl"
         android:layout_width="match_parent"
@@ -36,12 +37,13 @@
         android:layout_below="@id/toolBar"
         android:layout_above="@id/bottom_button">
 
+
         <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/productsRv"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_above="@id/floatingButton"
-            android:layout_alignParentTop="true"
-            android:id="@+id/productsRv"/>
+            android:layout_alignParentTop="true" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:layout_width="wrap_content"
@@ -188,7 +190,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:enabled="false"
                 android:text="Trả món"
                 android:gravity="center"
                 android:padding="10dp"

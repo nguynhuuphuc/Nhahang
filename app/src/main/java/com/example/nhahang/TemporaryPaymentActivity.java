@@ -1,32 +1,19 @@
 package com.example.nhahang;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.app.Application;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Toast;
 
 import com.example.nhahang.Adapters.ItemInTemporaryPaymentAdapter;
 import com.example.nhahang.Models.OrderItemModel;
-import com.example.nhahang.Models.ProductInReservationModel;
-import com.example.nhahang.Models.ReservationModel;
 import com.example.nhahang.Models.TableModel;
 import com.example.nhahang.Utils.Util;
 import com.example.nhahang.databinding.ActivityTemporaryPaymentBinding;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class TemporaryPaymentActivity extends AppCompatActivity{
@@ -46,6 +33,13 @@ public class TemporaryPaymentActivity extends AppCompatActivity{
         Intent intent = getIntent();
         tableModel = (TableModel) intent.getSerializableExtra("table");
         orderItemModels = (List<OrderItemModel>) intent.getSerializableExtra("orderItems");
+        String activity = intent.getStringExtra("activity");
+        if(activity != null && activity.equals(PaidOrdersManagementActivity.class.getSimpleName())){
+            binding.toolbar.setTitle("Chi tiết hóa đơn");
+            invisibleView(true);
+        }else{
+            invisibleView(false);
+        }
         mApp = (MyApplication) getApplication();
 
         binding.toolbar.setNavigationOnClickListener(new View.OnClickListener() {
@@ -67,5 +61,17 @@ public class TemporaryPaymentActivity extends AppCompatActivity{
         });
 
 
+    }
+
+    private void invisibleView(boolean b) {
+        if(b){
+            binding.discountLL.setVisibility(View.GONE);
+            binding.thuKhacLL.setVisibility(View.GONE);
+            binding.totalPricePaymentLL.setVisibility(View.GONE);
+            return;
+        }
+        binding.discountLL.setVisibility(View.VISIBLE);
+        binding.thuKhacLL.setVisibility(View.VISIBLE);
+        binding.totalPricePaymentLL.setVisibility(View.VISIBLE);
     }
 }

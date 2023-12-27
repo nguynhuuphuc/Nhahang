@@ -60,8 +60,6 @@ public class TableAdapter extends RecyclerView.Adapter<TableAdapter.ViewHolder> 
     private final List<TableModel> tableModelListOld;
     private IClickItemTableListener iClickItemTableListener;
     private Context context;
-    private FirebaseFirestore db = FirebaseFirestore.getInstance();
-    private FirebaseDatabase realtimeDB = FirebaseDatabase.getInstance();
 
 
     public TableAdapter(Context context, List<TableModel> tableModelList, IClickItemTableListener listener) {
@@ -111,30 +109,6 @@ public class TableAdapter extends RecyclerView.Adapter<TableAdapter.ViewHolder> 
             }
         });
 
-    }
-
-    private void getOrderByTableId(int table_id,TableAdapter.ViewHolder holder) {
-        OrderRequest request = new OrderRequest();
-        request.setTable_id(table_id);
-        ApiService.apiService.getOrderByTableId(request)
-                .enqueue(new Callback<OrderModel>() {
-                    @Override
-                    public void onResponse(Call<OrderModel> call, Response<OrderModel> response) {
-                        if(response.isSuccessful()){
-                            OrderModel model = response.body();
-                            assert model != null;
-                            Util.updateDateLabel(holder.curDate,model.getOrder_date());
-                            Util.updateTimeLabel(holder.currTime,model.getOrder_date());
-                            Util.updateMoneyLabel(holder.totalPrice,model.getTotal_amount());
-                        }
-
-                    }
-
-                    @Override
-                    public void onFailure(Call<OrderModel> call, Throwable t) {
-
-                    }
-                });
     }
 
 

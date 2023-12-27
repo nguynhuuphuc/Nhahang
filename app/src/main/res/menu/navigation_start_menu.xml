@@ -17,5 +17,9 @@
             android:id="@+id/nav_revenueStatistics"
             android:title="Doanh thu"/>
 
+        <item
+            android:id="@+id/nav_customers"
+            android:title="Quản lý khách hàng"/>
+
     </group>
 </menu>

@@ -92,7 +92,8 @@ public class ChangeTableActivity extends AppCompatActivity implements SwipeRefre
         changeTables = new ArrayList<>();
 
         binding.swipeRefreshLayout.setOnRefreshListener(this);
-
+        getAllTables();
+        viewTableCategories();
         InProgress(false);
         setSupportActionBar(binding.toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
@@ -136,8 +137,7 @@ public class ChangeTableActivity extends AppCompatActivity implements SwipeRefre
 
         });
         binding.typeTableRv.setAdapter(categoryTableAdapter);
-        viewTableCategories();
-        getAllTables();
+
     }
 
     private void viewTableCategories() {
@@ -285,6 +285,7 @@ public class ChangeTableActivity extends AppCompatActivity implements SwipeRefre
             message.put("old_table_id",currentTableModel.getTable_id());
             message.put("new_table_id",tableModel.getTable_id());
             object.put("message",message);
+            object.put("action","CHANGE_TABLE");
             mApp.getWebSocketClient().send(object.toString());
         } catch (JSONException e) {
             e.printStackTrace();

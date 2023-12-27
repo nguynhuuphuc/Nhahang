@@ -97,7 +97,7 @@ public class PaymentActivity extends AppCompatActivity {
     private ActivityResultLauncher<Intent> launcher;
     private String vnpayUrl;
     private String paymentMethod = "CASH";
-    private int paymentMethodId = 1; // 1: Tiền mặt (Mặc định) , 2: QR, 3: Chuyển khoản
+    private int paymentMethodId = 1; // 1: Tiền mặt (Mặc định) , 2: VNPAY, 3: Chuyển khoản
     private MyApplication mApp;
 
     public String getPaymentMethod() {
@@ -224,8 +224,10 @@ public class PaymentActivity extends AppCompatActivity {
                                 // Cập nhật giá trị mới vào EditText
                                 binding.discountEt.setText(formattedAmount);
                                 binding.discountEt.setSelection(formattedAmount.length());
+                                orderModel.setDiscount_amount(amount);
                             }else {
                                 String formattedAmount = decimalFormat.format(orderTotalAmount);
+                                orderModel.setDiscount_amount(orderTotalAmount);
                                 binding.discountEt.setText(formattedAmount);
                                 binding.discountEt.setSelection(formattedAmount.length());
                             }
@@ -410,7 +412,7 @@ public class PaymentActivity extends AppCompatActivity {
                         updatePaidOrder();
                         setPaymentMethodId(1);
                         break;
-                    case "QR":
+                    case "VNPAY":
                         openGateWayVNPay();
                         setPaymentMethodId(2);
 
@@ -691,6 +693,7 @@ public class PaymentActivity extends AppCompatActivity {
             message.put("status","đã hoàn tất thanh toán đơn của " + tableModel.getTable_name() );
             message.put("new_table_id",tableModel.getTable_id());
             object.put("message",message);
+            object.put("action","PAID");
             mApp.getWebSocketClient().send(object.toString());
         } catch (JSONException e) {
             e.printStackTrace();

@@ -233,9 +233,17 @@ public class RevenueStatisticsActivity extends AppCompatActivity implements OnCh
             @Override
             public void onResponse(Call<ArrayList<RevenueResponse>> call, Response<ArrayList<RevenueResponse>> response) {
                 if(response.isSuccessful()){
-                    RevenueResponse forecast = response.body().get(0);
-                    binding.todayWillQuantityTv.setText(String.valueOf(forecast.getQuantity_forecast()));
-                    Util.updateMoneyLabel(binding.todayWillTotalAmountTv,forecast.getTotal_forecast());
+                    try {
+                        assert response.body() != null;
+                        RevenueResponse forecast = response.body().get(0);
+                        if(forecast != null){
+                            binding.todayWillQuantityTv.setText(String.valueOf(forecast.getQuantity_forecast()));
+                            Util.updateMoneyLabel(binding.todayWillTotalAmountTv,forecast.getTotal_forecast());}
+
+                    }catch (Exception e){
+                        binding.todayWillTotalAmountTv.setText("0,000₫");
+                        binding.todayWillQuantityTv.setText("0");
+                    }
                 }
             }
 
@@ -252,9 +260,15 @@ public class RevenueStatisticsActivity extends AppCompatActivity implements OnCh
             @Override
             public void onResponse(Call<ArrayList<RevenueResponse>> call, Response<ArrayList<RevenueResponse>> response) {
                 if(response.isSuccessful()){
-                    RevenueResponse todayRev = response.body().get(0);
-                    Util.updateMoneyLabel(binding.todayTotalAmountTv,todayRev.getTotal());
-                    binding.todayQuantityTv.setText(String.valueOf(todayRev.getQuantity()));
+                    try {
+                        RevenueResponse todayRev = response.body().get(0);
+                        Util.updateMoneyLabel(binding.todayTotalAmountTv,todayRev.getTotal());
+                        binding.todayQuantityTv.setText(String.valueOf(todayRev.getQuantity()));
+                    }catch (Exception e){
+                        binding.todayTotalAmountTv.setText("0,000");
+                        binding.todayQuantityTv.setText("0");
+                    }
+
                 }
             }
 

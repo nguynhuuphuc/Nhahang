@@ -6,6 +6,8 @@ public class MessageEvent {
     private NotificationModel notificationModel;
     private String activitySimpleName;
     private List<TableModel> changeTables;
+    private List<ReservationModel> reservationModels;
+    private String toActivity;
 
     public MessageEvent() {
     }
@@ -17,6 +19,22 @@ public class MessageEvent {
     public MessageEvent(NotificationModel notificationModel, String activitySimpleName) {
         this.notificationModel = notificationModel;
         this.activitySimpleName = activitySimpleName;
+    }
+
+    public String getToActivity() {
+        return toActivity;
+    }
+
+    public void setToActivity(String toActivity) {
+        this.toActivity = toActivity;
+    }
+
+    public List<ReservationModel> getReservationModels() {
+        return reservationModels;
+    }
+
+    public void setReservationModels(List<ReservationModel> reservationModels) {
+        this.reservationModels = reservationModels;
     }
 
     public MessageEvent(List<TableModel> changeTables, String activitySimpleName) {

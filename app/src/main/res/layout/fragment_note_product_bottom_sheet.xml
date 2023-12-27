@@ -157,6 +157,7 @@
                     android:drawableRight="@drawable/icon_edit_14dp"
                     android:gravity="center_vertical"
                     android:hint="Nhập ghi chú"
+                    android:imeOptions="actionNext"
                     android:padding="10dp"
                     android:textSize="14sp" />
 

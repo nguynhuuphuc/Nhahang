@@ -304,8 +304,14 @@ public class SelectProductActitvity extends AppCompatActivity{
                             for (QueryDocumentSnapshot document: task.getResult()){
                                 MenuModel model = document.toObject(MenuModel.class);
                                 model.setDocumentId(document.getId());
-                                alreadyAddToTable(model);
-                                menuModelsList.add(model);
+                                if(document.contains("isDelete")){
+                                    model.setDelete(document.getBoolean("isDelete"));
+                                }
+                                if(!model.getDelete()){
+                                    alreadyAddToTable(model);
+                                    menuModelsList.add(model);
+                                }
+
                             }
                             menuAdapter.notifyDataSetChanged();
                             inProgressItem(false);

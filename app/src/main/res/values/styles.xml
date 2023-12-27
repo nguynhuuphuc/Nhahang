@@ -18,5 +18,9 @@
         <!-- Add other styling attributes as needed -->
     </style>
 
+    <style name="ToolbarColoredNavIcon2" parent="Widget.AppCompat.Toolbar">
+        <item name="navigationIconTint  ">@color/white</item>
+    </style>
+
 
 </resources>

@@ -79,10 +79,10 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Sửa hồ sơ"
-                        android:textColor="@color/black"
+                        android:text="Xoá tài khoản"
+                        android:textColor="@color/white"
                         android:padding="10dp"
-                        android:background="@color/ghost_white"/>
+                        android:background="@color/neon_red" />
 
                 </androidx.cardview.widget.CardView>
 

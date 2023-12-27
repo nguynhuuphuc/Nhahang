@@ -24,6 +24,8 @@ import com.example.nhahang.Interfaces.IClickItemCategoryTableListener;
 import com.example.nhahang.Interfaces.IClickItemTableListener;
 import com.example.nhahang.Models.CategoryTableModel;
 import com.example.nhahang.Models.LocationModel;
+import com.example.nhahang.Models.MessageEvent;
+import com.example.nhahang.Models.NotificationModel;
 import com.example.nhahang.Models.Requests.UserUidRequest;
 import com.example.nhahang.Models.TableModel;
 import com.example.nhahang.OrderDetailActivity;
@@ -32,6 +34,10 @@ import com.example.nhahang.Utils.Auth;
 import com.example.nhahang.Utils.GridSpacingItemDecoration;
 import com.example.nhahang.databinding.FragmentHomeBinding;
 import com.google.protobuf.Api;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -199,6 +205,33 @@ public class MapKitchenFragment extends Fragment implements SwipeRefreshLayout.O
 
     @Override
     public void onRefresh() {
+        viewTableCategories();
+        getAllTables();
+    }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
+    public void onStop() {
+        EventBus.getDefault().unregister(this);
+        super.onStop();
+    }
+
+    @Subscribe(sticky = true,threadMode = ThreadMode.MAIN)
+    public void onMessageEvent(MessageEvent event) {
+        if(event.getChangeTables() != null){
+            tableAdapter.updateTable(event.getChangeTables());
+        }else {
+            NotificationModel model = event.getNotificationModel();
+            NotificationModel.Message messageObject = model.parseMessage();
+            tableAdapter.updateTable(messageObject.getUpdateTables());
+        }
+        if(EventBus.getDefault().removeStickyEvent(event)) {
+            event.setChangeTables(new ArrayList<>());
+        }
     }
 }

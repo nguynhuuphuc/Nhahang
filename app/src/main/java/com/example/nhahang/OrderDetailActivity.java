@@ -1,5 +1,6 @@
 package com.example.nhahang;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
@@ -11,6 +12,7 @@ import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -20,8 +22,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
+import android.window.OnBackInvokedDispatcher;
 
 import com.example.nhahang.Adapters.OrderItemAdapter;
+import com.example.nhahang.Adapters.OrderItemAdapter2;
 import com.example.nhahang.BottomSheetDialogFragments.WarningDeleteItemFragment;
 import com.example.nhahang.Interfaces.ApiService;
 import com.example.nhahang.Interfaces.IClickViewInWaringDelete;
@@ -30,8 +34,10 @@ import com.example.nhahang.Models.MenuModel;
 import com.example.nhahang.Models.MessageEvent;
 import com.example.nhahang.Models.NotificationModel;
 import com.example.nhahang.Models.OrderItemModel;
+import com.example.nhahang.Models.OrderItemModel2;
 import com.example.nhahang.Models.OrderModel;
 import com.example.nhahang.Models.Requests.OrderRequest;
+import com.example.nhahang.Models.Requests.UserUidRequest;
 import com.example.nhahang.Models.Respones.ChangeOrderTableResponse;
 import com.example.nhahang.Models.Respones.ServerResponse;
 import com.example.nhahang.Models.TableModel;
@@ -42,6 +48,7 @@ import com.example.nhahang.databinding.ActivityOrderDetailBinding;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
+import org.java_websocket.client.WebSocketClient;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -71,6 +78,9 @@ public class OrderDetailActivity extends AppCompatActivity implements ActivityRe
     private List<TableModel> changeTables;
     private boolean isChangeTable;
     private boolean isKitchen;
+    private OrderItemAdapter2 orderItemAdapter2;
+    private List<OrderItemModel2> orderItemModel2s;
+    private WebSocketClient webSocketClient;
 
 
 
@@ -84,6 +94,10 @@ public class OrderDetailActivity extends AppCompatActivity implements ActivityRe
         setSupportActionBar(binding.toolBar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
         setToobarNavIcon();
+        tableModel = (TableModel) getIntent().getSerializableExtra("table");
+        isNotifyKitchen = getIntent().getBooleanExtra("isNotifyKitchen",false);
+        setEnableThongBao(isNotifyKitchen);
+
 
         changeTables = new ArrayList<>();
 
@@ -95,16 +109,14 @@ public class OrderDetailActivity extends AppCompatActivity implements ActivityRe
         }
 
         myApp = (MyApplication) getApplication();
+        webSocketClient = myApp.getWebSocketClient();
 
         launcher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),this);
-
-
-        binding.toolBar.setNavigationOnClickListener(new View.OnClickListener() {
+        // This callback will only be called when MyFragment is at least Started.
+        OnBackPressedCallback callback = new OnBackPressedCallback(true /* enabled by default */) {
             @Override
-            public void onClick(View view) {
-//                if(!changeTables.isEmpty()){
-//                    EventBus.getDefault().postSticky(new MessageEvent(changeTables,this.getClass().getSimpleName()));
-//                }
+            public void handleOnBackPressed() {
+                // Handle the back button event
                 Intent resultIntent = new Intent();
                 resultIntent.putExtra("table", tableModel);
                 setResult(RESULT_OK, resultIntent);
@@ -115,7 +127,70 @@ public class OrderDetailActivity extends AppCompatActivity implements ActivityRe
                     if(isChangeTable) finish();
                     finishAfterTransition();
                 }
+            }
+        };
+        getOnBackPressedDispatcher().addCallback(OrderDetailActivity.this, callback);
 
+
+        binding.toolBar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                getOnBackPressedDispatcher().onBackPressed();
+            }
+        });
+
+
+        binding.servDish.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                InProgress(true);
+                OrderRequest orderRequest = new OrderRequest();
+                orderRequest.setOrderItemModels(orderItemModels);
+                ApiService.apiService.servOrderItems(orderRequest).enqueue(new Callback<ServerResponse>() {
+                    @Override
+                    public void onResponse(Call<ServerResponse> call, Response<ServerResponse> response) {
+                        if(response.isSuccessful()){
+                            viewServDish(response.body().isIs_servDish());
+                            getOrderItems();
+                            notifyKitchenServ();
+                            InProgress(false);
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<ServerResponse> call, Throwable t) {
+                        Toast.makeText(myApp, "Lỗi server", Toast.LENGTH_SHORT).show();
+                        InProgress(false);
+
+                    }
+                });
+            }
+        });
+
+        binding.confirmOrder.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                InProgress(true);
+                OrderRequest orderRequest = new OrderRequest();
+                orderRequest.setOrderItemModels(orderItemModels);
+                ApiService.apiService.confirmOrderItems(orderRequest).enqueue(new Callback<ServerResponse>() {
+                    @Override
+                    public void onResponse(Call<ServerResponse> call, Response<ServerResponse> response) {
+                        if(response.isSuccessful()){
+                            viewConfirm(response.body().isIs_confirm());
+                            getOrderItems();
+                            notifyKitchenConfirm();
+                            InProgress(false);
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<ServerResponse> call, Throwable t) {
+                        Toast.makeText(myApp, "Lỗi server", Toast.LENGTH_SHORT).show();
+                        InProgress(false);
+
+                    }
+                });
             }
         });
 
@@ -140,16 +215,23 @@ public class OrderDetailActivity extends AppCompatActivity implements ActivityRe
             }
         });
 
-        tableModel = (TableModel) getIntent().getSerializableExtra("table");
+
 
 
         binding.tableId.setText(tableModel.getTable_name());
         Util.updateMoneyLabel(binding.totalPrice,tableModel.getTotal_amount());
+        orderItemModels = new ArrayList<>();
+
+        orderItemAdapter = new OrderItemAdapter(this,orderItemModels,myApp.getMenuModels(),getSupportFragmentManager());
 
         binding.productsRv.setLayoutManager(new LinearLayoutManager(this,LinearLayoutManager.VERTICAL,false));
-        orderItemModels = new ArrayList<>();
-        orderItemAdapter = new OrderItemAdapter(this,orderItemModels,myApp.getMenuModels(),getSupportFragmentManager());
-        binding.productsRv.setAdapter(orderItemAdapter);
+        if(isKitchen){
+            orderItemModel2s = new ArrayList<>();
+            orderItemAdapter2 = new OrderItemAdapter2(this,orderItemModel2s,myApp.getMenuModels());
+            binding.productsRv.setAdapter(orderItemAdapter2);
+        }else {
+            binding.productsRv.setAdapter(orderItemAdapter);
+        }
 
         orderItemAdapter.setOnChangeOrderItemListener(new IOrderItemDetail() {
             @Override
@@ -183,8 +265,46 @@ public class OrderDetailActivity extends AppCompatActivity implements ActivityRe
         });
 
 
-        
+        getOrderItems();
 
+
+    }
+    private void notifyKitchenServ() {
+        JSONObject object = new JSONObject();
+        try {
+            object.put("from", Auth.User_Uid);
+            object.put("position","B");
+            JSONObject message = new JSONObject();
+            message.put("order_id",orderModel.getOrder_id());
+            message.put("status","trả món cho " + tableModel.getTable_name());
+            object.put("message",message);
+            webSocketClient.send(object.toString());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+
+    private void notifyKitchenConfirm() {
+
+        JSONObject object = new JSONObject();
+        try {
+            object.put("from", Auth.User_Uid);
+            object.put("position","B");
+            JSONObject message = new JSONObject();
+            message.put("order_id",orderModel.getOrder_id());
+            message.put("status","đã xác nhận món cho " + tableModel.getTable_name());
+            object.put("message",message);
+            webSocketClient.send(object.toString());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+
+    private void getOrderItems() {
         OrderRequest request = new OrderRequest();
         request.setOrder_id(tableModel.getOrder_id());
         InProgress(true);
@@ -194,8 +314,15 @@ public class OrderDetailActivity extends AppCompatActivity implements ActivityRe
             public void onResponse(Call<ArrayList<OrderItemModel>> call, Response<ArrayList<OrderItemModel>> response) {
                 if(response.isSuccessful()){
                     assert response.body() != null;
+                    orderItemModels.clear();
                     orderItemModels.addAll(response.body());
-                    orderItemAdapter.notifyDataSetChanged();
+                    if(isKitchen){
+                        orderItemModel2s.clear();
+                        orderItemModel2s = getOrderItemModel2();
+                        orderItemAdapter2.setData(orderItemModel2s);
+                    }else{
+                        orderItemAdapter.notifyDataSetChanged();
+                    }
                     binding.quantity.setText(orderItemAdapter.getQuantity().toString());
                     calculationTotalOrder();
                     InProgress(false);
@@ -226,14 +353,117 @@ public class OrderDetailActivity extends AppCompatActivity implements ActivityRe
 
     }
 
+    private List<OrderItemModel2> getOrderItemModel2() {
+        List<OrderItemModel2> list = new ArrayList<>();
+        List<OrderItemModel> unConfirms = new ArrayList<>();
+        List<OrderItemModel> confirms = new ArrayList<>();
+        List<OrderItemModel> servList = new ArrayList<>();
+        for(final OrderItemModel item : orderItemModels){
+            try {
+                if( item.getQuantity_serv() != 0){
+                    OrderItemModel serv = item.clone();
+                    serv.setQuantity(item.getQuantity_serv());
+                    servList.add(serv);
+                }
+                if(item.getQuantity_confirm() != 0  && item.getQuantity_serv() < item.getQuantity_confirm()){
+                    OrderItemModel confirm = item.clone();
+                    confirm.setQuantity(item.getQuantity_confirm() - item.getQuantity_serv());
+                    confirms.add(confirm);
+                }
+                if(item.getQuantity() > item.getQuantity_confirm()){
+                    OrderItemModel unConfirm = item.clone();
+                    unConfirm.setQuantity(item.getQuantity() - item.getQuantity_confirm());
+                    unConfirms.add(unConfirm);
+                }
+            }catch (CloneNotSupportedException e ){
+                e.printStackTrace();
+            }
+
+        }
+        if(!unConfirms.isEmpty()){
+            list.add(new OrderItemModel2("Chưa xác nhận",unConfirms));
+        }
+        if(!confirms.isEmpty()){
+            list.add(new OrderItemModel2("Đã xác nhận", confirms));
+        }
+        if(!servList.isEmpty()){
+            list.add(new OrderItemModel2("Đã trả món cho quầy",servList));
+        }
+        return list;
+    }
+
     private void setViewForStaff() {
         binding.staffActionView.setVisibility(View.VISIBLE);
         binding.kitchenActionView.setVisibility(View.GONE);
     }
 
+
+    void viewConfirm(boolean isConfirm){
+        if(isConfirm){
+            binding.confirmOrder.setEnabled(false);
+            binding.confirmOrder.setText("Đã xác nhận");
+            binding.confirmOrder.setBackgroundResource(R.drawable.radius_light_blue_background);
+        }else{
+            binding.confirmOrder.setEnabled(true);
+            binding.confirmOrder.setText("Xác nhận");
+            binding.confirmOrder.setBackgroundResource(R.drawable.radius_sky_blue_background);
+        }
+
+    }
+
+    void  viewServDish(boolean isServ){
+        if(isServ){
+            binding.servDish.setEnabled(false);
+            binding.servDish.setText("Đã trả món");
+            binding.servDish.setBackgroundResource(R.drawable.radius_light_blue_background);
+        }else{
+            binding.servDish.setEnabled(true);
+            binding.servDish.setText("Trả món");
+            binding.servDish.setBackgroundResource(R.drawable.radius_sky_blue_background);
+        }
+    }
+
     private void setViewForKitChen() {
+        InProgress(true);
+        binding.floatingButton.setVisibility(View.GONE);
         binding.staffActionView.setVisibility(View.GONE);
         binding.kitchenActionView.setVisibility(View.VISIBLE);
+        OrderRequest request = new OrderRequest();
+        request.setOrder_id(tableModel.getOrder_id());
+        ApiService.apiService.isConfirmOrder(request).enqueue(new Callback<ServerResponse>() {
+            @Override
+            public void onResponse(Call<ServerResponse> call, Response<ServerResponse> response) {
+                if(response.isSuccessful()){
+                    viewConfirm(response.body().isIs_confirm());
+                    InProgress(false);
+                }
+                
+            }
+
+            @Override
+            public void onFailure(Call<ServerResponse> call, Throwable t) {
+                Toast.makeText(myApp, "Server Error", Toast.LENGTH_SHORT).show();
+                InProgress(false);
+            }
+        });
+        InProgress(true);
+        ApiService.apiService.isServOrder(request).enqueue(new Callback<ServerResponse>() {
+            @Override
+            public void onResponse(Call<ServerResponse> call, Response<ServerResponse> response) {
+                if(response.isSuccessful()){
+
+                    viewServDish(response.body().isIs_servDish());
+                    InProgress(false);
+                }
+
+            }
+
+            @Override
+            public void onFailure(Call<ServerResponse> call, Throwable t) {
+                Toast.makeText(myApp, "Server Error", Toast.LENGTH_SHORT).show();
+                InProgress(false);
+            }
+        });
     }
 
     private void backToHome(String response) {
@@ -319,6 +549,7 @@ public class OrderDetailActivity extends AppCompatActivity implements ActivityRe
                     assert res != null;
                     myApp.getWebSocketClient().send("Update order table");
                     notifyForKitchen();
+                    setOrderItemsNotify();
                     InProgress(false);
                 }
 
@@ -330,6 +561,12 @@ public class OrderDetailActivity extends AppCompatActivity implements ActivityRe
             }
         });
 
+    }
+
+    private void setOrderItemsNotify() {
+        for(OrderItemModel itemModel : orderItemModels){
+            itemModel.setQuantity_notify(itemModel.getQuantity());
+        }
     }
 
     private void notifyForKitchen() {
@@ -359,6 +596,7 @@ public class OrderDetailActivity extends AppCompatActivity implements ActivityRe
                 message.put("status","đã cập nhật đơn của " + tableModel.getTable_name());
                 message.put("new_table_id",tableModel.getTable_id());
                 object.put("message",message);
+                object.put("condition","UN_NOTIFY_KITCHEN");
                 myApp.getWebSocketClient().send(object.toString());
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -410,6 +648,7 @@ public class OrderDetailActivity extends AppCompatActivity implements ActivityRe
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        if(isKitchen) return false;
         getMenuInflater().inflate(R.menu.menu_more_order_detail,menu);
         return true;
     }
@@ -458,6 +697,7 @@ public class OrderDetailActivity extends AppCompatActivity implements ActivityRe
         }
 
     }
+
 
 
     public double getOrderTotalAmount() {
@@ -544,8 +784,7 @@ public class OrderDetailActivity extends AppCompatActivity implements ActivityRe
         super.onStop();
     }
 
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onEvent(List<TableModel> changeTables) {
+    public void onChange(List<TableModel> changeTables) {
        for(TableModel model : changeTables){
            if(model.getOrder_id() == 0 && model.getTable_id() == tableModel.getTable_id()){
                tableModel = model;
@@ -568,7 +807,7 @@ public class OrderDetailActivity extends AppCompatActivity implements ActivityRe
         if (activitySimpleName.equals(this.getClass().getSimpleName())){
             return;
         }
-        onEvent(event.getChangeTables());
+        onChange(event.getChangeTables());
     }
 
 
@@ -597,5 +836,6 @@ public class OrderDetailActivity extends AppCompatActivity implements ActivityRe
             }
         });
     }
+
 
 }

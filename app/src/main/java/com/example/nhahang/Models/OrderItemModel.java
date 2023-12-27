@@ -1,9 +1,11 @@
 package com.example.nhahang.Models;
 
+import androidx.annotation.NonNull;
+
 import java.io.Serializable;
 import java.util.Date;
 
-public class OrderItemModel implements Serializable,Comparable<OrderItemModel> {
+public class OrderItemModel implements Serializable,Comparable<OrderItemModel>,Cloneable  {
     private int order_id;
     private String menu_item_id;
     private int quantity;
@@ -14,7 +16,45 @@ public class OrderItemModel implements Serializable,Comparable<OrderItemModel> {
     private String note;
     private boolean isEnableSplit;
     private int quantitySplit;
+    private int quantity_confirm;
+    private int quantity_serv;
+    private int quantity_notify;
+    private Date notify_time;
+    private String status;
+    private int status_id;
+    private int id;
 
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public int getStatus_id() {
+        return status_id;
+    }
+
+    public void setStatus_id(int status_id) {
+        this.status_id = status_id;
+    }
+
+    public Date getNotify_time() {
+        return notify_time;
+    }
+
+    public void setNotify_time(Date notify_time) {
+        this.notify_time = notify_time;
+    }
 
     public OrderItemModel() {
     }
@@ -105,6 +145,14 @@ public class OrderItemModel implements Serializable,Comparable<OrderItemModel> {
         this.discount_amount = 0;
     }
 
+    public int getQuantity_notify() {
+        return quantity_notify;
+    }
+
+    public void setQuantity_notify(int quantity_notify) {
+        this.quantity_notify = quantity_notify;
+    }
+
     public String getNote() {
         return note;
     }
@@ -118,11 +166,30 @@ public class OrderItemModel implements Serializable,Comparable<OrderItemModel> {
         this.discount_percentage = 0;
     }
 
+    public int getQuantity_confirm() {
+        return quantity_confirm;
+    }
 
+    public void setQuantity_confirm(int quantity_confirm) {
+        this.quantity_confirm = quantity_confirm;
+    }
 
-    public OrderItemModel clone(){
+    public int getQuantity_serv() {
+        return quantity_serv;
+    }
+
+    public void setQuantity_serv(int quantity_serv) {
+        this.quantity_serv = quantity_serv;
+    }
+
+    public OrderItemModel clone1(){
         return new OrderItemModel(this.getOrder_id(),this.getMenu_item_id(),this.getQuantity(),this.getItem_price(),this.getOrder_time(),this
                 .getDiscount_amount(),this.getDiscount_percentage(),this.getNote());
+    }
+    @NonNull
+    @Override
+    public OrderItemModel clone() throws CloneNotSupportedException {
+        return (OrderItemModel) super.clone();
     }
 
     public boolean isChange(OrderItemModel model){
@@ -130,6 +197,9 @@ public class OrderItemModel implements Serializable,Comparable<OrderItemModel> {
             return true;
         if(this.discount_amount != model.getDiscount_amount())
             return true;
+        if(this.note == null && model.getNote() != null){
+            return true;
+        }
         if(this.note!= null && !this.note.equals(model.getNote()))
             return true;
         if(this.quantity != model.getQuantity())

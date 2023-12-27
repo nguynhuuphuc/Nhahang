@@ -1,5 +1,8 @@
 package com.example.nhahang.Models;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+
 import java.io.Serializable;
 import java.util.Date;
 
@@ -130,5 +133,11 @@ public class Employee implements Serializable {
 
     public void setAvatar(String avatar) {
         this.avatar = avatar;
+    }
+
+    public JsonObject toJson() {
+        Gson gson = new Gson();
+        String jsonString = gson.toJson(this);
+        return gson.fromJson(jsonString, JsonObject.class);
     }
 }

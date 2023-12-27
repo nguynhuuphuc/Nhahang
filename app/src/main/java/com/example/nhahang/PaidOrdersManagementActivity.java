@@ -3,15 +3,20 @@ package com.example.nhahang;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Toast;
 
 import com.example.nhahang.Adapters.PaidOrdersManagementAdapter;
 import com.example.nhahang.Interfaces.ApiService;
 import com.example.nhahang.Models.Employee;
+import com.example.nhahang.Models.OrderItemModel;
 import com.example.nhahang.Models.PaidOrderModel;
+import com.example.nhahang.Models.Requests.OrderRequest;
 import com.example.nhahang.Utils.Util;
 import com.example.nhahang.databinding.ActivityPaidOrdersManagementBinding;
+import com.google.protobuf.Api;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,9 +56,34 @@ public class PaidOrdersManagementActivity extends AppCompatActivity implements S
         binding.swipeRefreshLayout.setOnRefreshListener(this);
 
         getViewPaidOrders();
+        paidOrdersAdapter.setOnItemClickListener(new PaidOrdersManagementAdapter.OnItemClickListener() {
+            @Override
+            public void onClicked(PaidOrderModel paidOrderModel) {
+                getPaidOrderItem(paidOrderModel.getOrder_id());
+            }
+        });
 
 
 
+    }
+
+    private void getPaidOrderItem(int order_id) {
+        ApiService.apiService.getPaidOrderItems(new OrderRequest(order_id,false)).enqueue(new Callback<ArrayList<OrderItemModel>>() {
+            @Override
+            public void onResponse(Call<ArrayList<OrderItemModel>> call, Response<ArrayList<OrderItemModel>> response) {
+                if(response.isSuccessful()){
+                    Intent intent = new Intent(PaidOrdersManagementActivity.this,TemporaryPaymentActivity.class);
+                    intent.putExtra("activity",PaidOrdersManagementActivity.class.getSimpleName());
+                    intent.putExtra("orderItems",response.body());
+                    startActivity(intent);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ArrayList<OrderItemModel>> call, Throwable t) {
+
+            }
+        });
     }
 
     private void getViewPaidOrders() {

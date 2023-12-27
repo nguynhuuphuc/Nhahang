@@ -131,7 +131,7 @@ public class UserFragment extends Fragment {
         binding.save.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Map<String, Object> user = new HashMap<>();
+
                 Employee employee = new Employee();
                 employee.setUser_uid(Auth.User_Uid);
                 employee.setFull_name(binding.nameEt.getText().toString().trim());
@@ -253,6 +253,7 @@ public class UserFragment extends Fragment {
                 }
                 Auth.SetNull();
                 MySharedPreferences.saveUserUid(getContext(),null);
+                MySharedPreferences.savePosition(getContext(),null);
                 startActivity(new Intent(getContext(), LoginActivity.class));
                 getActivity().finish();
             }

@@ -9,6 +9,7 @@ import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -82,6 +83,11 @@ public class OrderItemAdapter extends RecyclerView.Adapter<OrderItemAdapter.View
                 Util.updateMoneyLabel(holder.price,priceDiscount);
             }
         }
+        if(model.getNote() != null){
+            holder.note.setText(model.getNote());
+        }else{
+            holder.note.setText("");
+        }
         MenuModel menuModel = null;
         for (MenuModel item : menuModels){
             if(item.getDocumentId().equals(model.getMenu_item_id())){
@@ -98,7 +104,8 @@ public class OrderItemAdapter extends RecyclerView.Adapter<OrderItemAdapter.View
         holder.item.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                OrderItemModel orderItemOld = model.clone();
+                if(fragmentManager == null ) return;
+                OrderItemModel orderItemOld = model.clone1();
                 NoteOrderItemFragment bottomSheet = new NoteOrderItemFragment(model, finalMenuModel);
                 bottomSheet.show(fragmentManager,bottomSheet.getTag());
                 bottomSheet.setINoteOrderItem(new INoteOrderItem() {
@@ -132,8 +139,8 @@ public class OrderItemAdapter extends RecyclerView.Adapter<OrderItemAdapter.View
     public static class ViewHolder extends RecyclerView.ViewHolder {
         private SwipeLayout swipeLayout;
         private ImageView imgV,deleteIv;
-        private TextView name,price,quantity;
-        private CardView item;
+        private TextView name,price,quantity,note;
+        private RelativeLayout item;
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             imgV = itemView.findViewById(R.id.imageItemInMenuIv);
@@ -143,6 +150,7 @@ public class OrderItemAdapter extends RecyclerView.Adapter<OrderItemAdapter.View
             swipeLayout = itemView.findViewById(R.id.swipe_layout);
             deleteIv = itemView.findViewById(R.id.deleteIv);
             item = itemView.findViewById(R.id.drag_item);
+            note = itemView.findViewById(R.id.noteItemTv);
         }
     }
 }

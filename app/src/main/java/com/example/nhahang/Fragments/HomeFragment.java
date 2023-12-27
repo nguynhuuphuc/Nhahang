@@ -112,6 +112,7 @@ public class HomeFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                                 case "StartOrderDetail":
                                     Intent intent = new Intent(requireActivity(),OrderDetailActivity.class);
                                     intent.putExtra("table",updateTable);
+                                    intent.putExtra("isNotifyKitchen", true);
                                     sendNotifyNewOrder(updateTable);
                                     launcher.launch(intent);
                                     break;
@@ -194,6 +195,10 @@ public class HomeFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     }
 
     private void sendNotifyNewOrder(TableModel tableModel) {
+        if(webSocketClient.isClosed()){
+            webSocketClient.reconnect();
+        }
+
         JSONObject object = new JSONObject();
         try {
             object.put("from",Auth.User_Uid);
@@ -332,17 +337,20 @@ public class HomeFragment extends Fragment implements SwipeRefreshLayout.OnRefre
 
     @Subscribe(sticky = true,threadMode = ThreadMode.MAIN)
     public void onMessageEvent(MessageEvent event) {
-        if(event.getChangeTables() != null){
-            tableAdapter.updateTable(event.getChangeTables());
+        if(event.getToActivity()==null){
+            if(event.getChangeTables() != null){
+                tableAdapter.updateTable(event.getChangeTables());
+            }else {
+                NotificationModel model = event.getNotificationModel();
+                NotificationModel.Message messageObject = model.parseMessage();
+                tableAdapter.updateTable(messageObject.getUpdateTables());
+            }
+            if(EventBus.getDefault().removeStickyEvent(event)){
 
-        }else {
-            NotificationModel model = event.getNotificationModel();
-            NotificationModel.Message messageObject = model.parseMessage();
-            tableAdapter.updateTable(messageObject.getUpdateTables());
+                event.setChangeTables(new ArrayList<>());
+            }
         }
-        if(EventBus.getDefault().removeStickyEvent(event)){
-            event.setChangeTables(new ArrayList<>());
-        }
+
     }
 
 }

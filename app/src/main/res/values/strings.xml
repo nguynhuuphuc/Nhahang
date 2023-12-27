@@ -17,5 +17,7 @@
     <string name="forgetPassword"><u>Quên mật khẩu</u></string>
     <string name="notificationMess"><b>Phúc Nguyễn</b> đã tạo đơn mới cho <b>Bàn số 1</b></string>
     <string name="channel_name">channel 1</string>
+    <string name="channel_message">Tin nhắn</string>
+    <string name="channel_name2">Bếp</string>
     <string name="channel_description">channel description</string>
 </resources>

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:paddingTop="4dp"
+    android:paddingBottom="16dp">
+
+    <TextView
+        android:id="@+id/nameTv"
+        android:layout_width="wrap_content"
+        android:layout_marginStart="2dp"
+        android:layout_height="wrap_content"
+        android:text="Phúc nguyễn"
+        android:textColor="@color/black"/>
+
+
+    <TextView
+        android:layout_below="@id/nameTv"
+        android:layout_marginStart="2dp"
+        android:layout_marginEnd="100dp"
+        android:background="@drawable/bg_received_message"
+        android:id="@+id/receivedTv"
+        android:padding="8dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/black"
+        android:text="Tin nhắn gửi ádasdasdasdadsadss  ádasd ád ád ádad sáda sdasd ad ád"/>
+    <TextView
+        android:id="@+id/timeTv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/receivedTv"
+        android:textSize="12sp"
+        android:text="10/10/23 10:10AM"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="2dp"/>
+
+
+
+</RelativeLayout>

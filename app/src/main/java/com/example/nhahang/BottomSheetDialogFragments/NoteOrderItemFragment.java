@@ -82,7 +82,7 @@ public class NoteOrderItemFragment extends BottomSheetDialogFragment {
             public void onClick(View view) {
                 String quantityText = binding.quantityNumberEt.getText().toString().trim();
                 int quantity = Integer.parseInt(quantityText);
-                if(quantity > 1)
+                if(quantity > orderItem.getQuantity_notify())
                 {
                     quantity -=1;
                     binding.quantityNumberEt.setText(Integer.toString(quantity));
@@ -118,6 +118,7 @@ public class NoteOrderItemFragment extends BottomSheetDialogFragment {
                 bottomSheetDialog.dismiss();
             }
         });
+
 
 
 
@@ -178,6 +179,7 @@ public class NoteOrderItemFragment extends BottomSheetDialogFragment {
                     binding.discountEt.clearFocus();
                     binding.noteEt.clearFocus();
                     binding.quantityNumberEt.clearFocus();
+                    setQuantityLimit();
                 }
             }
         };
@@ -187,24 +189,20 @@ public class NoteOrderItemFragment extends BottomSheetDialogFragment {
         binding.quantityNumberEt.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
             }
 
             @Override
             public void onTextChanged(CharSequence s, int i, int i1, int i2) {
                 String text = s.toString();
-                if(text.isEmpty()){
-                    binding.quantityNumberEt.setText("1");
-                    binding.quantityNumberEt.setSelection(1);
-                }else{
+                if(!text.isEmpty() )
+                {
                     binding.quantityNumberEt.setSelection(text.length());
-                }
-                calculateTotalPriceProduct();
+                    calculateTotalPriceProduct();
+                    }
             }
 
             @Override
             public void afterTextChanged(Editable editable) {
-
             }
         });
 
@@ -259,6 +257,20 @@ public class NoteOrderItemFragment extends BottomSheetDialogFragment {
 
 
         return bottomSheetDialog;
+    }
+
+    private void setQuantityLimit() {
+        //Đặt tối thiểu số lượng
+        String quantityText = binding.quantityNumberEt.getText().toString();
+        String limitQuantity = String.valueOf(orderItem.getQuantity_notify());
+        if(quantityText.isEmpty()){
+            binding.quantityNumberEt.setText(limitQuantity);
+            return;
+        }
+        int quantity = Integer.parseInt(quantityText);
+        if(quantity < orderItem.getQuantity_notify()){
+            binding.quantityNumberEt.setText(limitQuantity);
+        }
     }
 
     private void setView() {

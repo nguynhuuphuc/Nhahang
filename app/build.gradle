@@ -20,13 +20,9 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
-    buildFeatures {
-        viewBinding {
-            enabled = true
-        }
-
+    viewBinding {
+        enabled = true
     }
-
     buildTypes {
         customDebugType {
             debuggable false
@@ -71,8 +67,6 @@ dependencies {
 
     implementation files('libs/merchant-1.0.25.aar')
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.6.2'
-    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2'
 
 
     testImplementation 'junit:junit:4.13.2'

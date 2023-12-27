@@ -1,5 +1,9 @@
 package com.example.nhahang;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
@@ -11,15 +15,19 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.viewpager2.widget.ViewPager2;
 
 import android.annotation.SuppressLint;
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Typeface;
+import android.net.Uri;
 import android.os.Bundle;
+import android.service.notification.StatusBarNotification;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.TextUtils;
 import android.text.style.StyleSpan;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -33,12 +41,15 @@ import com.example.nhahang.Interfaces.ApiService;
 import com.example.nhahang.Interfaces.IUpdateTablesListener;
 import com.example.nhahang.Interfaces.WebSocketListener;
 import com.example.nhahang.Models.Employee;
+import com.example.nhahang.Models.IgnoreEvent;
 import com.example.nhahang.Models.MenuModel;
 import com.example.nhahang.Models.MessageEvent;
+import com.example.nhahang.Models.MessageModel;
 import com.example.nhahang.Models.NotificationModel;
 import com.example.nhahang.Models.PaymentMethodModel;
 import com.example.nhahang.Models.Requests.PositionIdRequest;
 import com.example.nhahang.Models.Requests.UserUidRequest;
+import com.example.nhahang.Models.ReservationModel;
 import com.example.nhahang.Models.TableModel;
 import com.example.nhahang.Utils.Auth;
 import com.example.nhahang.Utils.MySharedPreferences;
@@ -64,6 +75,8 @@ import com.google.gson.Gson;
 
 
 import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 import org.java_websocket.handshake.ServerHandshake;
 
 import java.net.URI;
@@ -81,12 +94,15 @@ import retrofit2.Response;
     private ActivityMainBinding binding;
     private MyApplication myApp;
     private MyWebSocketClient webSocketClient;
-    private BadgeDrawable badge;
+    private BadgeDrawable badge,messBadge;
     private List<MenuModel> menuModels;
     private FirebaseFirestore firestore;
     private List<Employee> employees;
     private List<PaymentMethodModel> paymentMethods;
     private MessageEvent event;
+    private List<ReservationModel> changeReservations;
+    private ActivityResultLauncher<Intent> launcher;
+    private  IgnoreEvent ignoreEvent;
 
 
         @Override
@@ -95,23 +111,31 @@ import retrofit2.Response;
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         View view = binding.getRoot();
         setContentView(view);
-
+        registerLauncher();
+        EventBus.getDefault().register(this);
         badge = BadgeDrawable.create(this);
         badge.setBackgroundColor(ContextCompat.getColor(this,R.color.red)); // Customize the badge background color
         badge.setBadgeTextColor(ContextCompat.getColor(this,R.color.white));// Customize the text color
-        badge.setVisible(true);
-        badge.setNumber(99999);
+        setBadgeNumber(getNotificationCount(getApplicationContext()));
         badge.setHorizontalOffset(50);// Adjust the vertical position of the badge
         badge.setBadgeGravity(BadgeDrawable.TOP_END);// Set the position of the badge relative to the icon
+
+            messBadge = BadgeDrawable.create(this);
+            messBadge.setBackgroundColor(ContextCompat.getColor(this,R.color.red)); // Customize the badge background color
+            messBadge.setBadgeTextColor(ContextCompat.getColor(this,R.color.white));// Customize the text color
+            setBadgeMessNumber(getMessNotiCount(getApplicationContext()));
+            messBadge.setHorizontalOffset(50);// Adjust the vertical position of the badge
+            messBadge.setBadgeGravity(BadgeDrawable.TOP_END);// Set the position of the badge relative to the icon
 
         myApp = (MyApplication) getApplication();
         webSocketClient = myApp.getWebSocketClient();
         menuModels = myApp.getMenuModels();
         employees = myApp.getEmployees();
         paymentMethods = myApp.getPaymentMethods();
-
+        changeReservations = new ArrayList<>();
         event = new MessageEvent(this.getClass().getSimpleName());
         event.setChangeTables(new ArrayList<>());
+        event.setReservationModels(new ArrayList<>());
 
         getMenu();
         getEmployees();
@@ -133,8 +157,6 @@ import retrofit2.Response;
             myApp.setWebSocketClient(webSocketClient);
             webSocketClient.setWebSocketListener(this);
         }
-            startActivity(new Intent(MainActivity.this,KitchenMainActivity.class));
-            finish();
 
 
         FirebaseAuth auth = FirebaseAuth.getInstance();
@@ -182,30 +204,30 @@ import retrofit2.Response;
 
         binding.navigationView.setNavigationItemSelectedListener(this);
 
-            Menu menu = binding.navigationView.getMenu();
-            int maxWidth = 0;
 
-            for (int i = 0; i < menu.size(); i++) {
-                MenuItem menuItem = menu.getItem(i);
-                CharSequence title = menuItem.getTitle();
-                if (title != null) {
-                    TextView textView = new TextView(this);
-                    textView.setText(title);
-                    textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 19.1f); // Set text size
-                    textView.measure(0, 0);
-                    int textWidth = textView.getMeasuredWidth();
-                    maxWidth = Math.max(maxWidth, textWidth);
+
+    }
+
+    private void registerLauncher(){
+            launcher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
+                @Override
+                public void onActivityResult(ActivityResult o) {
+                    if(o.getResultCode() == RESULT_OK){
+                        Intent data = o.getData();
+                        assert data != null;
+                        String activity = data.getStringExtra("activity");
+                        if(activity.equals(NotificationActivity.class.getSimpleName())){
+                            //clear notifiy
+                            NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                            notificationManager.cancelAll();
+                        }
+
+                        setBadgeNumber(getNotificationCount(getApplicationContext()));
+                        setBadgeMessNumber(getMessNotiCount(getApplicationContext()));
+
+                    }
                 }
-            }
-
-        DrawerLayout.LayoutParams params = (DrawerLayout.LayoutParams) binding.navigationView.getLayoutParams();
-
-            // Đặt chiều rộng của NavigationView là chiều dài của title dài nhất
-        params.width = (int)maxWidth;
-
-            // Cập nhật layout params mới
-        binding.navigationView.setLayoutParams(params);
-
+            });
     }
 
         private void getPaymentMethods() {
@@ -384,7 +406,9 @@ import retrofit2.Response;
         public boolean onCreateOptionsMenu(Menu menu) {
             getMenuInflater().inflate(R.menu.menu_main, menu);
             int icon = menu.findItem(R.id.action_notification).getItemId();
+            int mess = menu.findItem(R.id.action_message).getItemId();
             BadgeUtils.attachBadgeDrawable(badge,binding.toolbar,icon);
+            BadgeUtils.attachBadgeDrawable(messBadge,binding.toolbar,mess);
 
             return true;
         }
@@ -405,7 +429,9 @@ import retrofit2.Response;
                     public boolean onMenuItemClick(MenuItem item) {
                         switch (item.getItemId()) {
                             case R.id.action_logout:
-                                Toast.makeText(MainActivity.this, "logout", Toast.LENGTH_SHORT).show();
+                                startActivity(new Intent(MainActivity.this,KitchenMainActivity.class));
+                                finish();
+
                                 // Handle menu item 1 click
                                 return true;
                         }
@@ -416,10 +442,15 @@ import retrofit2.Response;
                 popupMenu.show();
                 return true;
             }
+            if(id == R.id.action_message){
+                launcher.launch(new Intent(this,ConversationsActivity.class));
+                return true;
+            }
 
 
             if (id == R.id.action_notification) {
-                startActivity(new Intent(this,NotificationActivity.class));
+                launcher.launch(new Intent(this,NotificationActivity.class));
+
                 // Handle the notification icon click here
                 // You can open a notification activity or perform any desired action.
                 return true;
@@ -443,6 +474,10 @@ import retrofit2.Response;
                 case R.id.nav_revenueStatistics:
                     startActivity(new Intent(MainActivity.this,RevenueStatisticsActivity.class));
                     break;
+                case R.id.nav_customers:
+                    startActivity(new Intent(MainActivity.this,CustomerManagementActivity.class));
+                    break;
+
             }
             return true;
         }
@@ -462,28 +497,75 @@ import retrofit2.Response;
 
             NotificationModel notificationModel = new Gson().fromJson(message,NotificationModel.class);
             NotificationModel.Message messageObject = notificationModel.parseMessage();
-            CharSequence contentText = getMessage(notificationModel,messageObject);
+
 
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    popUpNotification(contentText,notificationModel);
+                    CharSequence contentText = null;
+                    boolean ignore = false;
+                    boolean isMessage = false;
+                    if(!notificationModel.isFor_customer()){
+                    if(notificationModel.getActivity() != null && notificationModel.getActivity().equals("Reservation")){
+                        changeReservations.add(notificationModel.getReservation());
 
-                    Util.changeTablesAdding(event.getChangeTables(),messageObject.getUpdateTables());
-                    Toast.makeText(myApp, String.valueOf(event.getChangeTables().size()), Toast.LENGTH_SHORT).show();
-                    EventBus.getDefault().postSticky(event);
+                        Util.changeReservationAdding(event.getReservationModels(),changeReservations);
+                        changeReservations.clear();
+                        event.setToActivity("Reservation");
+                        event.setNotificationModel(notificationModel);
+                        contentText = getMessageReservation(notificationModel,messageObject);
+                        EventBus.getDefault().postSticky(event);
+                    }
+                    if(notificationModel.getActivity() != null && notificationModel.getActivity().equals("Message")){
+                        isMessage = true;
+                        EventBus.getDefault().post(notificationModel.getConversationMessage());
+                        if(ignoreEvent != null && ignoreEvent.getConversation_id() == notificationModel.getConversationMessage().getConversation_id()){
+                            ignore = true;
+                        }
+                        contentText = getMessageCustomer(notificationModel.getConversationMessage());
+                    }
+                    if( contentText == null){
+                        contentText = getMessageEmployee(notificationModel,messageObject);
+                    }
+                    if(!notificationModel.getCreated_by().equals(Auth.User_Uid)){
+                        if(!ignore){
+                            if(isMessage){
+
+                                popUpNotificationMesage(contentText,notificationModel);
+                            }else {
+
+                                popUpNotification(contentText,notificationModel);
+                            }
+                        }
+                    }
+                    if(messageObject.getUpdateTables() != null){
+                        Util.changeTablesAdding(event.getChangeTables(),messageObject.getUpdateTables());
+                        event.setToActivity(null);
+                        EventBus.getDefault().postSticky(event);
+                    }
+                    setBadgeNumber(getNotificationCount(myApp));//set number notify badge
+                    setBadgeMessNumber(getMessNotiCount(myApp));//set number mess badge
+                }
                 }
             });
         }
 
+        private CharSequence getMessageReservation(NotificationModel notificationModel, NotificationModel.Message messageObject) {
+            String created_by;
+            created_by = notificationModel.getReservation().getCustomer_name().trim();
+            return (CharSequence)TextUtils.concat(created_by, " ", messageObject.getStatus());
 
+        }
 
-        private void popUpNotification(CharSequence contentText, NotificationModel notificationModel) {
-            NotificationCompat.Builder builder = new NotificationCompat.Builder(MainActivity.this, MyApplication.CHANNEL_ID)
+        private void popUpNotificationMesage(CharSequence contentText, NotificationModel notificationModel) {
+            Uri sound = Uri.parse("android.resource://" + getPackageName() + "/"+ R.raw.sound_notification);
+
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(MainActivity.this, MyApplication.CHANNEL_MESSAGE)
                     .setSmallIcon(R.drawable.hp_res_logo)
-                    .setContentTitle("Thông báo")
+                    .setSound(sound)
+                    .setContentTitle("Tin nhắn")
                     .setContentText(contentText)
-                    .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+                    .setPriority(NotificationCompat.PRIORITY_MAX);
 
             NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
             if(notificationManager != null){
@@ -492,7 +574,30 @@ import retrofit2.Response;
             }
         }
 
-        private CharSequence getMessage(NotificationModel notificationModel, NotificationModel.Message messageObject) {
+
+
+        private void popUpNotification(CharSequence contentText, NotificationModel notificationModel) {
+            Uri sound = Uri.parse("android.resource://" + getPackageName() + "/"+ R.raw.sound_notification);
+
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(MainActivity.this, MyApplication.CHANNEL_ID)
+                    .setSmallIcon(R.drawable.hp_res_logo)
+                    .setSound(sound)
+                    .setContentTitle("Thông báo")
+                    .setContentText(contentText)
+                    .setPriority(NotificationCompat.PRIORITY_MAX);
+
+            NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            if(notificationManager != null){
+                notificationManager.notify((int) notificationModel.getId(),builder.build());
+
+            }
+        }
+        private CharSequence getMessageCustomer(MessageModel messageModel) {
+
+            return (CharSequence)TextUtils.concat(messageModel.getFull_name(), ": ",messageModel.getContent() );
+        }
+
+        private CharSequence getMessageEmployee(NotificationModel notificationModel, NotificationModel.Message messageObject) {
             SpannableString created_by = null;
             for (Employee employee : employees){
                 if(employee.getUser_uid().equals(notificationModel.getCreated_by())){
@@ -501,7 +606,9 @@ import retrofit2.Response;
                     break;
                 }
             }
+
             return (CharSequence)TextUtils.concat(created_by, " ", messageObject.getStatus());
+
         }
 
         @Override
@@ -510,6 +617,7 @@ import retrofit2.Response;
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
+                    Toast.makeText(myApp, "close", Toast.LENGTH_SHORT).show();
                     try {
                         Thread.sleep(2000);
                         webSocketClient.reconnect();
@@ -529,6 +637,88 @@ import retrofit2.Response;
 
         }
         // Method to update the badge count
+        public static int getNotificationCount(Context context) {
+            // Lấy NotificationManager
+            NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
-      
+            // Kiểm tra nếu NotificationManager không null
+            if (notificationManager != null) {
+                // Lấy danh sách các thông báo đang hoạt động
+                int count = 0;
+                StatusBarNotification[] activeNotifications = notificationManager.getActiveNotifications();
+                for(StatusBarNotification sbn : activeNotifications){
+                    if(!sbn.getNotification().getChannelId().equals(MyApplication.CHANNEL_MESSAGE)){
+                        count++;
+                    }
+                }
+                // Trả về số lượng thông báo
+                return count;
+            }
+
+            // Trong trường hợp có lỗi hoặc NotificationManager không khả dụng
+            return 0;
+        }
+
+        // Method to update the badge count
+        public static int getMessNotiCount(Context context) {
+            // Lấy NotificationManager
+            NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+
+            // Kiểm tra nếu NotificationManager không null
+            if (notificationManager != null) {
+                // Lấy danh sách các thông báo đang hoạt động
+                int count = 0;
+                StatusBarNotification[] activeNotifications = notificationManager.getActiveNotifications();
+                for(StatusBarNotification sbn : activeNotifications){
+                    if(sbn.getNotification().getChannelId().equals(MyApplication.CHANNEL_MESSAGE)){
+                        count++;
+                    }
+                }
+                // Trả về số lượng thông báo
+                return count;
+            }
+
+            // Trong trường hợp có lỗi hoặc NotificationManager không khả dụng
+            return 0;
+        }
+
+        private void setBadgeMessNumber(int number){
+            if(number == 0){
+                messBadge.setVisible(false);
+            }else{
+                messBadge.setVisible(true);
+                messBadge.setNumber(number);
+            }
+
+        }
+
+        private void setBadgeNumber(int number){
+            if(number == 0){
+                badge.setVisible(false);
+            }else{
+                badge.setVisible(true);
+                badge.setNumber(number);
+            }
+
+        }
+
+
+        @Override
+        protected void onDestroy() {
+            EventBus.getDefault().unregister(this);
+            super.onDestroy();
+        }
+
+        @Subscribe(threadMode = ThreadMode.MAIN)
+        public void onMessageEvent(IgnoreEvent ignoreEvent) {
+            if(ignoreEvent.getSource().equals(MessageActivity.class.getSimpleName())){
+                if(ignoreEvent.isIgnore()){
+                    this.ignoreEvent = ignoreEvent;
+                }else{
+                    this.ignoreEvent = null;
+                }
+
+            }
+
+        }
     }

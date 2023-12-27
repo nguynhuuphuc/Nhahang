@@ -142,10 +142,11 @@
                 android:text="@string/forgetPassword"/>
 
             <Button
+                android:layout_gravity="center"
                 android:id="@+id/kitchen"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="kitchen"/>
+                android:text="đăng nhập vào bếp"/>
 
     </LinearLayout>
 

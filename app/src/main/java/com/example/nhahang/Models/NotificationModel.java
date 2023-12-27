@@ -14,8 +14,73 @@ public class NotificationModel implements Serializable {
     private String read_by_users;
     private Message messageObject;
     private long notify_count;
+    private String position_id;
+    private boolean for_customer;
+
+    public boolean isFor_customer() {
+        return for_customer;
+    }
+
+    public void setFor_customer(boolean for_customer) {
+        this.for_customer = for_customer;
+    }
+
+    private String activity;
+    private int toCustomer;
+    private ReservationModel reservation;
+    private MessageModel conversationMessage;
+
+    public MessageModel getConversationMessage() {
+        return conversationMessage;
+    }
+
+    public void setConversationMessage(MessageModel conversationMessage) {
+        this.conversationMessage = conversationMessage;
+    }
+
+    public String getPosition_id() {
+        return position_id;
+    }
+
+    public void setPosition_id(String position_id) {
+        this.position_id = position_id;
+    }
+
+    public String getAction() {
+        return action;
+    }
+
+    public void setAction(String action) {
+        this.action = action;
+    }
+
+    private String action;
+
+    public String getPosition() {
+        return position_id;
+    }
+
+    public void setPositionId(String position_id) {
+        this.position_id = position_id;
+    }
 
     public NotificationModel() {
+    }
+
+    public String getActivity() {
+        return activity;
+    }
+
+    public void setActivity(String activity) {
+        this.activity = activity;
+    }
+
+    public ReservationModel getReservation() {
+        return reservation;
+    }
+
+    public void setReservation(ReservationModel reservation) {
+        this.reservation = reservation;
     }
 
     public NotificationModel(long id, String message, Date notify_time, String created_by, String read_by_users) {
@@ -100,10 +165,19 @@ public class NotificationModel implements Serializable {
         private String status;
         private long old_table_id, new_table_id;
         private List<TableModel> updateTables;
+        private List<OrderKitchenModel> updateKitchenCheckList;
 
         public Message(long order_id, String status) {
             this.order_id = order_id;
             this.status = status;
+        }
+
+        public List<OrderKitchenModel> getUpdateKitchenCheckList() {
+            return updateKitchenCheckList;
+        }
+
+        public void setUpdateKitchenCheckList(List<OrderKitchenModel> updateKitchenCheckList) {
+            this.updateKitchenCheckList = updateKitchenCheckList;
         }
 
         public long getOld_table_id() {

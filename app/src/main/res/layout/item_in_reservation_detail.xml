@@ -1,14 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.zerobranch.layout.SwipeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="90dp"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_margin="5dp"
-    android:id="@+id/swipe_layout"
-    app:draggedItem="@id/drag_item"
-    app:rightItem="@id/deleteIv"
-    app:swipeDirection="left">
+    app:cardCornerRadius="8dp"
+    app:cardElevation="5dp">
 
+    <com.zerobranch.layout.SwipeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/swipe_layout"
+        app:draggedItem="@id/drag_item"
+        app:rightItem="@id/deleteIv"
+        app:swipeDirection="left">
     <ImageView
         android:id="@+id/deleteIv"
         android:layout_width="85dp"
@@ -21,12 +26,8 @@
         android:layout_gravity="end"
         app:tint="@color/white" />
 
-    <androidx.cardview.widget.CardView
-        android:id="@+id/drag_item"
-        android:layout_width="match_parent"
-        android:layout_height="90dp">
-
         <RelativeLayout
+        android:id="@+id/drag_item"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/white">
@@ -66,7 +67,17 @@
             android:text="Name"
             android:textColor="@color/black"
             android:textStyle="bold" />
-        <TextView
+            <TextView
+                android:layout_marginStart="2dp"
+                android:id="@+id/noteItemTv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/nameItemInMenuTv"
+                android:layout_toRightOf="@id/imageItemInMenuRl"
+                android:layout_toLeftOf="@id/quantityTv"
+                android:layout_above="@id/priceItemInMenuTv"/>
+
+            <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/priceItemInMenuTv"
@@ -94,6 +105,7 @@
 
     </RelativeLayout>
 
-    </androidx.cardview.widget.CardView>
 
 </com.zerobranch.layout.SwipeLayout>
+
+</androidx.cardview.widget.CardView>

@@ -53,6 +53,7 @@ public class RegisterNewStaffActivity extends AppCompatActivity {
         binding = ActivityRegisterNewStaffBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        binding.toolbar.setTitle("Tạo tài khoản nhân viên");
         launcher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
             @Override
             public void onActivityResult(ActivityResult o) {

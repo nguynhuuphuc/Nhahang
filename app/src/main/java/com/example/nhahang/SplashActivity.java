@@ -72,6 +72,8 @@ public class SplashActivity extends AppCompatActivity {
 
         Auth.User_Uid = MySharedPreferences.getUserUid(this);
         Auth.PhoneNumber = MySharedPreferences.getPhone(this);
+        Auth.PositionID = MySharedPreferences.getPositionId(this);
+
 
 
         if (webSocketClient == null)  {
@@ -127,8 +129,17 @@ public class SplashActivity extends AppCompatActivity {
                     assert employee != null;
                     MySharedPreferences.saveUserUid(getApplication(),Auth.User_Uid);
                     MySharedPreferences.savePhone(getApplication(),Auth.PhoneNumber);
-                    startActivity(new Intent(SplashActivity.this,MainActivity.class));
-                    finish();
+                    if(Auth.PositionID != null && Auth.PositionID.equals("B")){
+                        Intent intent = new Intent(SplashActivity.this,KitchenMainActivity.class);
+                        intent.putExtra("keepLogin",true);
+                        startActivity(intent);
+
+                        finish();
+                    }else{
+                        startActivity(new Intent(SplashActivity.this,MainActivity.class));
+                        finish();
+                    }
+
                 }
             }
             @Override

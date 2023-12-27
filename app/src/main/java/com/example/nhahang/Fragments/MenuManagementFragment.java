@@ -31,6 +31,7 @@ import com.example.nhahang.Interfaces.IClickItemMenuCategoryListener;
 
 import com.example.nhahang.Models.MenuCategoryModel;
 import com.example.nhahang.Models.MenuModel;
+import com.example.nhahang.MyApplication;
 import com.example.nhahang.R;
 import com.example.nhahang.TrashActivity;
 import com.example.nhahang.databinding.FragmentMenuManagementBinding;
@@ -46,6 +47,8 @@ import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import org.greenrobot.eventbus.EventBus;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -56,7 +59,8 @@ public class MenuManagementFragment extends Fragment {
     private ItemInMenuManagementAdapter itemInMenuManagementAdapter;
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private FirebaseDatabase dbRealtime = FirebaseDatabase.getInstance();
-
+    private MyApplication mApp;
+    private boolean isChange = false;
     private List<MenuCategoryModel> menuCategoryModelList;
     private MenuCategoryAdapter menuCategoryAdapter;
     private SearchView searchView;
@@ -65,7 +69,7 @@ public class MenuManagementFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         binding = FragmentMenuManagementBinding.inflate(getLayoutInflater());
-
+        mApp = (MyApplication) requireActivity().getApplication();
         binding.categoryRV.setLayoutManager(new LinearLayoutManager(getContext(), RecyclerView.HORIZONTAL,false));
         menuCategoryModelList = new ArrayList<>();
         menuCategoryAdapter = new MenuCategoryAdapter(menuCategoryModelList, new IClickItemMenuCategoryListener() {
@@ -140,6 +144,7 @@ public class MenuManagementFragment extends Fragment {
                 Boolean isChange = snapshot.getValue(Boolean.class);
                 if(Boolean.TRUE.equals(isChange)){
                     dbRealtime.getReference("productManagementChange").setValue(false);
+                    EventBus.getDefault().postSticky(true);
                     displayItemByType(type);
                     db.collection("menucategory").orderBy("id", Query.Direction.ASCENDING).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                         @Override
@@ -190,6 +195,7 @@ public class MenuManagementFragment extends Fragment {
                                         menuModelsList.add(model);
                                     }
                                 }
+
                                 itemInMenuManagementAdapter.notifyDataSetChanged();
                                 inProgress(false);
                             }

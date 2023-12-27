@@ -150,7 +150,6 @@ public class VerifyOtpActivity extends AppCompatActivity {
     }
 
     void sendOtp(String phoneNumber,boolean isResend){
-
         startResendTimer();
         setInProgress(true);
         PhoneAuthOptions.Builder builder =

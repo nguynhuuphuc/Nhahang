@@ -5,224 +5,210 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 import android.widget.Toast;
+
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.app.ActivityOptionsCompat;
-import androidx.core.view.ViewCompat;
+
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
 
 import com.example.nhahang.Adapters.CategoryTableAdapter;
-import com.example.nhahang.Adapters.TableAdapter;
-import com.example.nhahang.Interfaces.ApiService;
-import com.example.nhahang.Interfaces.IClickItemCategoryTableListener;
-import com.example.nhahang.Interfaces.IClickItemTableListener;
-import com.example.nhahang.Models.CategoryTableModel;
-import com.example.nhahang.Models.LocationModel;
-import com.example.nhahang.Models.Requests.UserUidRequest;
-import com.example.nhahang.Models.TableModel;
-import com.example.nhahang.R;
-import com.example.nhahang.ReservationDetailActivity;
-import com.example.nhahang.SelectProductActitvity;
-import com.example.nhahang.Utils.Auth;
-import com.example.nhahang.databinding.FragmentHomeBinding;
-import com.example.nhahang.databinding.FragmentReservationBinding;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.Query;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
-import com.google.protobuf.Api;
+import com.example.nhahang.Adapters.LocalDateAdapter;
 
+import com.example.nhahang.Adapters.ReservationsAdapter;
+import com.example.nhahang.Interfaces.ApiService;
+
+import com.example.nhahang.Interfaces.IOnClickDateItemListener;
+
+import com.example.nhahang.Models.LocationModel;
+import com.example.nhahang.Models.MessageEvent;
+import com.example.nhahang.Models.NotificationModel;
+import com.example.nhahang.Models.Requests.ServerRequest;
+
+import com.example.nhahang.Models.ReservationModel;
+import com.example.nhahang.ReservationDetailActivity;
+
+
+import com.example.nhahang.databinding.FragmentReservationsBinding;
+
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.HashMap;
+
 import java.util.List;
-import java.util.Objects;
+import java.util.Locale;
+
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class ReservationFragment extends Fragment {
-    private FragmentHomeBinding binding;
-    private final FirebaseFirestore db = FirebaseFirestore.getInstance();
-    private final FirebaseDatabase dbRealtime = FirebaseDatabase.getInstance();
+public class ReservationFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener{
+    private FragmentReservationsBinding binding;
     private String location = "01";
     private List<LocationModel> locationList = new ArrayList<>();
     private CategoryTableAdapter categoryTableAdapter;
+    private List<LocalDate> localDates;
+    private LocalDateAdapter localDateAdapter;
+    private DateTimeFormatter formatter;
+    private LocalDate daySelected;
+
+    private List<ReservationModel> reservations;
+    private ReservationsAdapter reservationsAdapter;
+
+    private int dateItemSelected = 0;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        binding = FragmentHomeBinding.inflate(getLayoutInflater());
+        binding = FragmentReservationsBinding.inflate(getLayoutInflater());
         View view = binding.getRoot();
+        daySelected = LocalDate.now();
 
+        formatter = DateTimeFormatter.ofPattern("EEEE, d MMMM, yyyy", new Locale("vi"));
 
-        binding.typeTableRv.setLayoutManager(new LinearLayoutManager(getContext(),LinearLayoutManager.HORIZONTAL,false));
-        List<TableModel> tableModelList = new ArrayList<>();
-        TableAdapter tableAdapter = new TableAdapter(getContext(),tableModelList, new IClickItemTableListener() {
+        localDates = getDates();
+        localDateAdapter = new LocalDateAdapter(getContext(), localDates, new IOnClickDateItemListener() {
             @Override
-            public void onClickItemTableListener(TableModel tableModel, LinearLayout tablelabelLl,String oldPrice,int index) {
+            public void onClick(int position) {
+                // Sử dụng formatter để chuyển LocalDate thành chuỗi
+                dateItemSelected = position;
+                LocalDate date = localDates.get(position);
+                daySelected = date;
+                String formattedDate = date.format(formatter);
+                binding.dateTextView.setText(formattedDate);
+                getReservations();
+            }
+        });
+        GridLayoutManager layoutManager = new GridLayoutManager(getContext(),7);
+        binding.daysRecyclerView.setLayoutManager(layoutManager);
+        binding.daysRecyclerView.setAdapter(localDateAdapter);
+
+        reservations = new ArrayList<>();
+        reservationsAdapter = new ReservationsAdapter(getContext(),reservations);
+
+        binding.reservationsRv.setLayoutManager(new LinearLayoutManager(getContext(),LinearLayoutManager.VERTICAL,false));
+        binding.reservationsRv.setAdapter(reservationsAdapter);
+        reservationsAdapter.setOnClickItemListener(new ReservationsAdapter.OnClickItemListener() {
+            @Override
+            public void onClick(int position) {
+                ReservationModel reservation = reservations.get(position);
                 Intent intent = new Intent(getContext(), ReservationDetailActivity.class);
-                intent.putExtra("table",tableModel);
-                intent.putExtra("oldPrice",oldPrice);
-                ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(
-                        requireActivity(),
-                        tablelabelLl,
-                        Objects.requireNonNull(ViewCompat.getTransitionName(tablelabelLl))
-                );
-                startActivity(intent,options.toBundle());
-            }
-        });
-        GridLayoutManager gridLayoutManager = new GridLayoutManager(getContext(),2);
-        binding.tableRv.setLayoutManager(gridLayoutManager);
-        binding.tableRv.setAdapter(tableAdapter);
-        displayTable(location,tableModelList,tableAdapter);
-
-      categoryTableAdapter = new CategoryTableAdapter(locationList, new IClickItemCategoryTableListener() {
-            @Override
-            public void onClickItemCategoryTableListener(LocationModel locationModel) {
-
-            }
-
-        });
-
-        binding.typeTableRv.setAdapter(categoryTableAdapter);
-        viewCategories();
-
-
-
-//        db.collection("categorytable")
-//                .get()
-//                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-//                    @Override
-//                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-//                        if(task.isSuccessful()){
-//                            for (QueryDocumentSnapshot document: task.getResult()){
-//                                CategoryTableModel model = document.toObject(CategoryTableModel.class);
-//                                categoryTableModelList.add(model);
-//                            }
-//                            //categoryTableAdapter.notifyDataSetChanged();
-//                            InProgress(false);
-//                        }
-//                    }
-//                });
-        dbRealtime.getReference("orders").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                Boolean isChanged = snapshot.getValue(Boolean.class);
-                if(Boolean.TRUE.equals(isChanged)){
-                    dbRealtime.getReference("changedResTable").setValue(false);
-                    displayTable(location,tableModelList,tableAdapter);
-                }
-            }
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
+                intent.putExtra("reservation",reservation);
+                startActivity(intent);
 
             }
         });
-        dbRealtime.getReference("changedResTable").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                Boolean isChanged = snapshot.getValue(Boolean.class);
-                if(Boolean.TRUE.equals(isChanged)){
-                    dbRealtime.getReference("changedResTable").setValue(false);
-                    displayTable(location,tableModelList,tableAdapter);
-                }
-            }
+        getReservations();
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
+        binding.SwipeRefreshLayout.setOnRefreshListener(this);
 
-            }
-        });
-        dbRealtime.getReference("updateRes").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                Boolean isChanged = snapshot.getValue(Boolean.class);
-                if(Boolean.TRUE.equals(isChanged)){
-                    dbRealtime.getReference("updateRes").setValue(false);
-                    displayTable(location,tableModelList,tableAdapter);
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
 
         return view;
     }
 
-    private void viewCategories() {
+    private void getReservations() {
         InProgress(true);
-        ApiService.apiService.getAllLocations(new UserUidRequest(Auth.User_Uid))
-                .enqueue(new Callback<ArrayList<LocationModel>>() {
-                    @Override
-                    public void onResponse(Call<ArrayList<LocationModel>> call, Response<ArrayList<LocationModel>> response) {
-                        if(response.isSuccessful()){
-                            assert response.body()!=null;
-                            locationList.addAll(response.body());
+        ApiService.apiService.getReservationsByDay(new ServerRequest(daySelected.toString())).enqueue(new Callback<ArrayList<ReservationModel>>() {
+            @Override
+            public void onResponse(Call<ArrayList<ReservationModel>> call, Response<ArrayList<ReservationModel>> response) {
+                if(response.isSuccessful()){
+                    reservations.clear();
+                    reservations.addAll(response.body());
+                    reservationsAdapter.notifyDataSetChanged();
+                    InProgress(false);
+                }
+            }
 
-                        }
-                    }
+            @Override
+            public void onFailure(Call<ArrayList<ReservationModel>> call, Throwable t) {
+                Toast.makeText(getContext() , "Server err", Toast.LENGTH_SHORT).show();
+                InProgress(false);
 
-                    @Override
-                    public void onFailure(Call<ArrayList<LocationModel>> call, Throwable t) {
-
-                    }
-                });
+            }
+        });
     }
+
+    private List<LocalDate> getDates() {
+        List<LocalDate> localDates = new ArrayList<>();
+        LocalDate today = LocalDate.now();
+        String formattedDate = today.format(formatter);
+        binding.dateTextView.setText(formattedDate);
+        localDates.add(today);
+
+        // Thêm 6 ngày tiếp theo vào List
+        for (int i = 1; i <= 6; i++) {
+            localDates.add(today.plusDays(i));
+        }
+        return localDates;
+    }
+
+
+
 
     void InProgress(boolean isIn){
         if(isIn){
             binding.progressBar.setVisibility(View.VISIBLE);
-            binding.tableRv.setVisibility(View.GONE);
         }
         else{
             binding.progressBar.setVisibility(View.GONE);
-            binding.tableRv.setVisibility(View.VISIBLE);
+
         }
 
     }
 
-    private void displayTable(String location, List<TableModel> tableModelList, TableAdapter tableAdapter) {
-        InProgress(true);
-        db.collection("tables")
-                .orderBy("id", Query.Direction.DESCENDING)
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()){
-                            tableModelList.clear();
-                            for (QueryDocumentSnapshot documet: task.getResult()){
-                                TableModel model = documet.toObject(TableModel.class);
-                                if(model.getLocation().equals(location) && model.getStatus().equals("not available"))
-                                {
-                                    model.setDocumentId(documet.getId());
-                                    tableModelList.add(0, model);
-                                }
-                            }
-                            tableAdapter.notifyDataSetChanged();
-                            InProgress(false);
-                        }
-                    }
-                });
 
+    @Override
+    public void onRefresh() {
+        binding.SwipeRefreshLayout.setRefreshing(false);
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
+    public void onStop() {
+        EventBus.getDefault().unregister(this);
+        super.onStop();
+    }
+    @Subscribe(sticky = true,threadMode = ThreadMode.MAIN)
+    public void onMessageEvent(MessageEvent event) {
+        if(event.getToActivity().equals("Reservation")){
+            NotificationModel notify = event.getNotificationModel();
+            if(notify.getAction().equals("BOOKING_TABLE")){
+                reservations.add(notify.getReservation());
+                reservationsAdapter.sortItem();
+                return;
+            }
+            if(!event.getReservationModels().isEmpty()){
+                Toast.makeText(getContext(), ""+event.getReservationModels().size(), Toast.LENGTH_SHORT).show();
+                for(ReservationModel model : event.getReservationModels()){
+                    LocalDateTime localDateTime = model.getReservation_time().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+                    if(daySelected.equals(localDateTime.toLocalDate())){
+                        reservationsAdapter.updateItem(model);
+                    }
+                }
+                reservationsAdapter.sortItem();
+                if(EventBus.getDefault().removeStickyEvent(event)){
+                    event.setReservationModels(new ArrayList<>());
+                }
+            }
+        }
+
+    }
 }

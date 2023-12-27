@@ -11,6 +11,15 @@ public class MySharedPreferences {
         editor.putString("user_uid", user_uid);
         editor.apply();
     }
+    public static void savePosition(Context context,String positionId){
+        SharedPreferences.Editor editor = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit();
+        editor.putString("positionId", positionId);
+        editor.apply();
+    }
+    public static String getPositionId(Context context){
+        SharedPreferences preferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        return preferences.getString("positionId", null);
+    }
 
     public static String getUserUid(Context context) {
         SharedPreferences preferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);

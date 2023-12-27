@@ -6,6 +6,8 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
+import androidx.cardview.widget.CardView;
+
 import com.example.nhahang.Models.Employee;
 import com.example.nhahang.Models.PaidOrderModel;
 import com.example.nhahang.R;
@@ -20,6 +22,7 @@ public class PaidOrdersManagementAdapter extends BaseAdapter implements StickyLi
 
     private List<PaidOrderModel> paidOrderModels;
     private List<Employee> employees;
+    private OnItemClickListener onItemClickListener;
 
     public void setData(List<PaidOrderModel> paidOrderModels, List<Employee> employees){
         this.paidOrderModels = paidOrderModels;
@@ -27,6 +30,13 @@ public class PaidOrdersManagementAdapter extends BaseAdapter implements StickyLi
         notifyDataSetChanged();
     }
 
+    public interface OnItemClickListener{
+        void onClicked(PaidOrderModel paidOrderModel);
+    }
+
+    public void setOnItemClickListener(OnItemClickListener onItemClickListener) {
+        this.onItemClickListener = onItemClickListener;
+    }
 
     @Override
     public View getHeaderView(int position, View convertView, ViewGroup parent) {
@@ -78,6 +88,7 @@ public class PaidOrdersManagementAdapter extends BaseAdapter implements StickyLi
             itemViewHolder.paymentNameTv = convertView.findViewById(R.id.paymentNameTv);
             itemViewHolder.quantityTv = convertView.findViewById(R.id.quantityTv);
             itemViewHolder.totalAmountTv = convertView.findViewById(R.id.totalAmountTv);
+            itemViewHolder.cardViewItem = convertView.findViewById(R.id.cardViewItem);
             convertView.setTag(itemViewHolder);
         }else{
             itemViewHolder = (ItemViewHolder) convertView.getTag();
@@ -88,6 +99,15 @@ public class PaidOrdersManagementAdapter extends BaseAdapter implements StickyLi
         Util.updateMoneyLabel(itemViewHolder.totalAmountTv,model.getTotal_amount());
         itemViewHolder.quantityTv.setText(String.valueOf(model.getTotal_quantity()));
         itemViewHolder.paymentNameTv.setText(model.getPayment_method_name());
+        itemViewHolder.cardViewItem.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(onItemClickListener != null){
+                    onItemClickListener.onClicked(model);
+                }
+            }
+        });
+
 
 
         for(int i = 0; i < employees.size(); i++){
@@ -104,6 +124,7 @@ public class PaidOrdersManagementAdapter extends BaseAdapter implements StickyLi
 
 
 
+
         return convertView;
     }
 
@@ -112,5 +133,6 @@ public class PaidOrdersManagementAdapter extends BaseAdapter implements StickyLi
     }
     public class ItemViewHolder{
         private TextView timeTv,paidOrderIdTv,createdByTv,paymentNameTv,quantityTv,totalAmountTv;
+        private CardView cardViewItem;
     }
 }

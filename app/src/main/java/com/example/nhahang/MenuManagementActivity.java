@@ -34,7 +34,6 @@ public class MenuManagementActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = ActivityMenuManagementBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-
         setSupportActionBar(binding.toolbar);
 
         binding.toolbar.setNavigationOnClickListener(new View.OnClickListener() {

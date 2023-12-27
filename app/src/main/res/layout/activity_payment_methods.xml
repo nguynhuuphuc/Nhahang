@@ -90,7 +90,7 @@
                 android:id="@+id/bankingMethod"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Chuyển khoảng ngân hàng"
+                android:text="Chuyển khoản ngân hàng"
                 android:textColor="@color/black"
                 android:layout_centerVertical="true"
                 android:layout_toEndOf="@id/icon_currency_exchange"/>
