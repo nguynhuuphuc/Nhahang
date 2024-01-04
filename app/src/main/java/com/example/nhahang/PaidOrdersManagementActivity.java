@@ -59,7 +59,7 @@ public class PaidOrdersManagementActivity extends AppCompatActivity implements S
         paidOrdersAdapter.setOnItemClickListener(new PaidOrdersManagementAdapter.OnItemClickListener() {
             @Override
             public void onClicked(PaidOrderModel paidOrderModel) {
-                getPaidOrderItem(paidOrderModel.getOrder_id());
+                getPaidOrderItem(paidOrderModel);
             }
         });
 
@@ -67,13 +67,14 @@ public class PaidOrdersManagementActivity extends AppCompatActivity implements S
 
     }
 
-    private void getPaidOrderItem(int order_id) {
-        ApiService.apiService.getPaidOrderItems(new OrderRequest(order_id,false)).enqueue(new Callback<ArrayList<OrderItemModel>>() {
+    private void getPaidOrderItem(PaidOrderModel paidOrderModel) {
+        ApiService.apiService.getPaidOrderItems(new OrderRequest(paidOrderModel.getOrder_id(),false)).enqueue(new Callback<ArrayList<OrderItemModel>>() {
             @Override
             public void onResponse(Call<ArrayList<OrderItemModel>> call, Response<ArrayList<OrderItemModel>> response) {
                 if(response.isSuccessful()){
                     Intent intent = new Intent(PaidOrdersManagementActivity.this,TemporaryPaymentActivity.class);
                     intent.putExtra("activity",PaidOrdersManagementActivity.class.getSimpleName());
+                    intent.putExtra("paidOrder",paidOrderModel);
                     intent.putExtra("orderItems",response.body());
                     startActivity(intent);
                 }

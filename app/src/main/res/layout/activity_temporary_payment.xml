@@ -94,6 +94,7 @@
                 android:layout_gravity="left"/>
 
             <TextView
+                android:id="@+id/discountTv"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="right"
@@ -101,6 +102,7 @@
                 android:textColor="@color/black"
                 android:layout_marginStart="10dp"/>
             <TextView
+                android:id="@+id/discountAmountTv"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="right"

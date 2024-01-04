@@ -48,7 +48,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class Util {
-    public static final String localhost = "192.168.1.205";
+    public static final String localhost = "172.20.10.5";
     public static final String WEBSOCKET_URL = "ws://" + localhost+":3000";
 
         public static final String CRUD = "CRUD";
@@ -165,7 +165,15 @@ public class Util {
         }
         return "";
     }
-
+    public static double tinhTienGiamGia(double giaTien, double phanTramGiamGia) {
+        double tileGiamGia = phanTramGiamGia / 100;
+        return giaTien * tileGiamGia;
+    }
+    public static double tinhTienSauGiamGia(double giaTien, double phanTramGiamGia) {
+        double tileGiamGia = phanTramGiamGia / 100;
+        double tienGiam = giaTien * tileGiamGia;
+        return giaTien - tienGiam;
+    }
     public static View.OnTouchListener ShowOrHidePass(final EditText editText){
         return new View.OnTouchListener() {
             @SuppressLint("ClickableViewAccessibility")

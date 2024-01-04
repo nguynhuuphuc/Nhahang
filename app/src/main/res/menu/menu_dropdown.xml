@@ -4,7 +4,7 @@
     <item
         android:id="@+id/action_logout"
         android:icon="@drawable/ic_logout"
-        android:title="Logout"
+        android:title="Bếp"
         app:iconTint="@color/white"
         android:actionLayout="@layout/item_logout_with_icon" />
 </menu>

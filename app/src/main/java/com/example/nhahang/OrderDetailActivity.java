@@ -208,7 +208,7 @@ public class OrderDetailActivity extends AppCompatActivity implements ActivityRe
         binding.thongBao.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(myApp, "Thong bao cho bep", Toast.LENGTH_SHORT).show();
+                Toast.makeText(myApp, "Thông báo cho bếp", Toast.LENGTH_SHORT).show();
                 isNotifyKitchen = true;
                 updateOrderItems();
                 setEnableThongBao(false);

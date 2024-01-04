@@ -6,8 +6,6 @@ import java.util.Date;
 
 public class ReservationModel implements Serializable {
 
-
-
     private int id;
     private int customer_id;
     private String customer_name;
@@ -20,9 +18,15 @@ public class ReservationModel implements Serializable {
     private String status;
     private Date update_time;
     private int order_id;
+    private double total_amount;
 
+    public double getTotal_amount() {
+        return total_amount;
+    }
 
-
+    public void setTotal_amount(double total_amount) {
+        this.total_amount = total_amount;
+    }
 
     public ReservationModel() {
     }

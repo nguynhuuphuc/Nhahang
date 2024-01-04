@@ -10,6 +10,7 @@ import android.view.View;
 
 import com.example.nhahang.Adapters.ItemInTemporaryPaymentAdapter;
 import com.example.nhahang.Models.OrderItemModel;
+import com.example.nhahang.Models.PaidOrderModel;
 import com.example.nhahang.Models.TableModel;
 import com.example.nhahang.Utils.Util;
 import com.example.nhahang.databinding.ActivityTemporaryPaymentBinding;
@@ -23,6 +24,7 @@ public class TemporaryPaymentActivity extends AppCompatActivity{
     private List<OrderItemModel> orderItemModels;
     private ItemInTemporaryPaymentAdapter itemAdapter;
     private MyApplication mApp;
+    private boolean ignored;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,6 +38,20 @@ public class TemporaryPaymentActivity extends AppCompatActivity{
         String activity = intent.getStringExtra("activity");
         if(activity != null && activity.equals(PaidOrdersManagementActivity.class.getSimpleName())){
             binding.toolbar.setTitle("Chi tiết hóa đơn");
+            PaidOrderModel paidOrderModel = (PaidOrderModel) intent.getSerializableExtra("paidOrder");
+            if(paidOrderModel.getDiscount_amount() > 0){
+                ignored = true;
+                double totalPrice = paidOrderModel.getTotal_amount() - paidOrderModel.getDiscount_amount();
+                Util.updateMoneyLabel(binding.totalPricePayment,totalPrice);
+                Util.updateMoneyLabel(binding.discountAmountTv,paidOrderModel.getDiscount_amount());
+            }else
+            if (paidOrderModel.getDiscount_percentage() > 0){
+                ignored = true;
+                binding.discountTv.setText(paidOrderModel.getDiscount_percentage()+"%");
+                double totalPrice = Util.tinhTienSauGiamGia(paidOrderModel.getTotal_amount(),paidOrderModel.getDiscount_percentage());
+                Util.updateMoneyLabel(binding.totalPricePayment,totalPrice);
+                Util.updateMoneyLabel(binding.discountAmountTv,Util.tinhTienGiamGia(paidOrderModel.getTotal_amount(),paidOrderModel.getDiscount_percentage()));
+            }
             invisibleView(true);
         }else{
             invisibleView(false);
@@ -54,9 +70,11 @@ public class TemporaryPaymentActivity extends AppCompatActivity{
         itemAdapter.setIOnChange(new ItemInTemporaryPaymentAdapter.OnDataAdapterChange() {
             @Override
             public void onChange() {
-                Util.updateMoneyLabel(binding.totalPrice,itemAdapter.getOrderTotalAmount());
-                Util.updateMoneyLabel(binding.totalPricePayment,itemAdapter.getOrderTotalAmount());
-                binding.quantity.setText(String.valueOf(itemAdapter.getOrderTotalQuantity()));
+                    Util.updateMoneyLabel(binding.totalPrice,itemAdapter.getOrderTotalAmount());
+                    binding.quantity.setText(String.valueOf(itemAdapter.getOrderTotalQuantity()));
+                    if(!ignored){
+                        Util.updateMoneyLabel(binding.totalPricePayment,itemAdapter.getOrderTotalAmount());
+                    }
             }
         });
 
@@ -65,13 +83,11 @@ public class TemporaryPaymentActivity extends AppCompatActivity{
 
     private void invisibleView(boolean b) {
         if(b){
-            binding.discountLL.setVisibility(View.GONE);
             binding.thuKhacLL.setVisibility(View.GONE);
-            binding.totalPricePaymentLL.setVisibility(View.GONE);
             return;
         }
-        binding.discountLL.setVisibility(View.VISIBLE);
+
         binding.thuKhacLL.setVisibility(View.VISIBLE);
-        binding.totalPricePaymentLL.setVisibility(View.VISIBLE);
+
     }
 }

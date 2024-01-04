@@ -1,8 +1,11 @@
 package com.example.nhahang.Models;
 
+import java.io.Serializable;
 import java.util.Date;
 
-public class PaidOrderModel {
+public class PaidOrderModel implements Serializable {
+    private int discount_percentage;
+    private double discount_amount;
     private int order_id;
     private Date paid_time;
     private String created_by;
@@ -11,6 +14,22 @@ public class PaidOrderModel {
     private String payment_method_name;
     private int total_quantity;
     private String dateHeader;
+
+    public int getDiscount_percentage() {
+        return discount_percentage;
+    }
+
+    public void setDiscount_percentage(int discount_percentage) {
+        this.discount_percentage = discount_percentage;
+    }
+
+    public double getDiscount_amount() {
+        return discount_amount;
+    }
+
+    public void setDiscount_amount(double discount_amount) {
+        this.discount_amount = discount_amount;
+    }
 
     public PaidOrderModel() {
     }

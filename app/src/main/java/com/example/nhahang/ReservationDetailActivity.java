@@ -16,6 +16,7 @@ import com.example.nhahang.Models.Requests.ServerRequest;
 import com.example.nhahang.Models.ReservationModel;
 import com.example.nhahang.Models.Respones.ServerResponse;
 import com.example.nhahang.Utils.Auth;
+import com.example.nhahang.Utils.Util;
 import com.example.nhahang.databinding.ActivityReservationDetailBinding;
 import com.google.protobuf.Api;
 
@@ -69,7 +70,9 @@ public class ReservationDetailActivity extends AppCompatActivity {
         orderItemAdapter = new OrderItemAdapter(this,orderItemModelList,mApp.getMenuModels(),null);
         binding.productsRv.setLayoutManager(new LinearLayoutManager(this, RecyclerView.VERTICAL,false));
         binding.productsRv.setAdapter(orderItemAdapter);
-        getOrderItems();}
+        getOrderItems();
+            Util.updateMoneyLabel(binding.totalPrice,reservation.getTotal_amount());
+        }
 
         setSupportActionBar(binding.toolBar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
@@ -99,6 +102,7 @@ public class ReservationDetailActivity extends AppCompatActivity {
                 if(response.isSuccessful()){
                     orderItemModelList.addAll(response.body());
                     orderItemAdapter.notifyDataSetChanged();
+                    binding.quantity.setText(String.valueOf(orderItemAdapter.getQuantity()));
                     inProgress(false);
                 }
             }

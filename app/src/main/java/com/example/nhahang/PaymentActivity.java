@@ -409,7 +409,7 @@ public class PaymentActivity extends AppCompatActivity {
             public void onClick(View v) {
                 switch (getPaymentMethod()){
                     case "CASH":
-                        updatePaidOrder();
+                        updateOrders();
                         setPaymentMethodId(1);
                         break;
                     case "VNPAY":
@@ -510,7 +510,7 @@ public class PaymentActivity extends AppCompatActivity {
                 //thanh toán thành công trên webview
                 if(action.equals("SuccessBackAction")){
                     Toast.makeText(PaymentActivity.this, "Giao dịch thành công", Toast.LENGTH_SHORT).show();
-                    updatePaidOrder();
+                    updateOrders();
                 }
             }
         });
@@ -652,7 +652,7 @@ public class PaymentActivity extends AppCompatActivity {
         imageBinding.doneCv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                updatePaidOrder();
+                updateOrders();
             }
         });
 
@@ -698,6 +698,23 @@ public class PaymentActivity extends AppCompatActivity {
         } catch (JSONException e) {
             e.printStackTrace();
         }
+    }
+
+    private void updateOrders() {
+        OrderRequest request = new OrderRequest(orderModel);
+        ApiService.apiService.updateOrders(request).enqueue(new Callback<ServerResponse>() {
+            @Override
+            public void onResponse(Call<ServerResponse> call, Response<ServerResponse> response) {
+                if(response.isSuccessful()){
+                    updatePaidOrder();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ServerResponse> call, Throwable t) {
+
+            }
+        });
     }
 
 

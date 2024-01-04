@@ -96,7 +96,19 @@ public class PaidOrdersManagementAdapter extends BaseAdapter implements StickyLi
         PaidOrderModel model = paidOrderModels.get(position);
         itemViewHolder.timeTv.setText(Util.TimeFormatting(model.getPaid_time()));
         itemViewHolder.paidOrderIdTv.setText(String.valueOf(model.getOrder_id()));
-        Util.updateMoneyLabel(itemViewHolder.totalAmountTv,model.getTotal_amount());
+        double total = 0;
+        if(model.getDiscount_amount() > 0){
+            total = model.getTotal_amount() - model.getDiscount_amount();
+        }else
+        if(model.getDiscount_percentage() > 0){
+            total = Util.tinhTienSauGiamGia(model.getTotal_amount(),model.getDiscount_percentage());
+        }
+        if (total != 0){
+            Util.updateMoneyLabel(itemViewHolder.totalAmountTv,total);
+        }else{
+            Util.updateMoneyLabel(itemViewHolder.totalAmountTv,model.getTotal_amount());
+        }
+
         itemViewHolder.quantityTv.setText(String.valueOf(model.getTotal_quantity()));
         itemViewHolder.paymentNameTv.setText(model.getPayment_method_name());
         itemViewHolder.cardViewItem.setOnClickListener(new View.OnClickListener() {

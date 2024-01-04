@@ -417,31 +417,31 @@ import retrofit2.Response;
         public boolean onOptionsItemSelected(MenuItem item) {
             int id = item.getItemId();
 
-            if (id == R.id.action_more) { // R.id.action_settings is the ID of your three-dot menu item
-                View view = findViewById(R.id.action_more); // Provide the anchor view for the popup menu
-
-                PopupMenu popupMenu = new PopupMenu(this, view, 0, 0, R.style.PopupMenuStyle);
-
-                popupMenu.getMenuInflater().inflate(R.menu.menu_dropdown, popupMenu.getMenu());
-
-                popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-                    @Override
-                    public boolean onMenuItemClick(MenuItem item) {
-                        switch (item.getItemId()) {
-                            case R.id.action_logout:
-                                startActivity(new Intent(MainActivity.this,KitchenMainActivity.class));
-                                finish();
-
-                                // Handle menu item 1 click
-                                return true;
-                        }
-                        return false;
-                    }
-                });
-
-                popupMenu.show();
-                return true;
-            }
+//            if (id == R.id.action_more) { // R.id.action_settings is the ID of your three-dot menu item
+//                View view = findViewById(R.id.action_more); // Provide the anchor view for the popup menu
+//
+//                PopupMenu popupMenu = new PopupMenu(this, view, 0, 0, R.style.PopupMenuStyle);
+//
+//                popupMenu.getMenuInflater().inflate(R.menu.menu_dropdown, popupMenu.getMenu());
+//
+//                popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+//                    @Override
+//                    public boolean onMenuItemClick(MenuItem item) {
+//                        switch (item.getItemId()) {
+//                            case R.id.action_logout:
+//                                startActivity(new Intent(MainActivity.this,KitchenMainActivity.class));
+//                                finish();
+//
+//                                // Handle menu item 1 click
+//                                return true;
+//                        }
+//                        return false;
+//                    }
+//                });
+//
+//                popupMenu.show();
+//                return true;
+//            }
             if(id == R.id.action_message){
                 launcher.launch(new Intent(this,ConversationsActivity.class));
                 return true;

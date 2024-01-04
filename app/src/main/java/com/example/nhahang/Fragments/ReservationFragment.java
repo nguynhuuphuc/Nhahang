@@ -191,8 +191,14 @@ public class ReservationFragment extends Fragment implements SwipeRefreshLayout.
         if(event.getToActivity().equals("Reservation")){
             NotificationModel notify = event.getNotificationModel();
             if(notify.getAction().equals("BOOKING_TABLE")){
-                reservations.add(notify.getReservation());
-                reservationsAdapter.sortItem();
+                LocalDateTime localDateTime = notify.getReservation().getReservation_time().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+                if(daySelected.equals(localDateTime.toLocalDate())){
+                    reservations.add(notify.getReservation());
+                    reservationsAdapter.sortItem();
+                }
+                if(EventBus.getDefault().removeStickyEvent(event)){
+                    event.setReservationModels(new ArrayList<>());
+                }
                 return;
             }
             if(!event.getReservationModels().isEmpty()){
@@ -208,6 +214,7 @@ public class ReservationFragment extends Fragment implements SwipeRefreshLayout.
                     event.setReservationModels(new ArrayList<>());
                 }
             }
+
         }
 
     }
